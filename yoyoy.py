@@ -8,12 +8,14 @@ try:
     db = "odoo70_mydb_1"
     username = "odoo"
     password = "myodoo"
+    print ("Connexion a ODOO")
+    print (f"URL = {url}")
 
     # Connexion au serveur Odoo
     common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
-    print("BBB")
+    version = common.version()
+    print(f"Odoo version={version}")
     uid = common.authenticate(db, username, password, {})
-    print("AAA")
 
     # Vérification si l'authentification est réussie
     if uid:
@@ -23,3 +25,4 @@ try:
 
 except Exception as e:
     print(f"Une erreur s'est produite lors de la connexion : {e}")
+    
