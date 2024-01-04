@@ -17,10 +17,11 @@ Touch Tech Solution est une entreprise spécialisée dans l'achat-revente de sou
 ## Odoo ERP
 
 Odoo, notre système ERP, sert de base de données centralisée pour la gestion des stocks des articles. Les processus de gestion des ordres de production et des sorties de stock sont pris en charge de manière personnalisée à l'aide d'une application Python dédiée.
+
 ## Fichiers Python
 
 Le fichier Python inclus dans ce projet:
-- `script1.py`: [Application Logistique]
+- `PYTHON.py`: [Application Logistique]
 
 
 ## Installation
