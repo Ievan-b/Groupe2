@@ -17,10 +17,10 @@ def connect(url, db, username, password):
         return None
  
  
-url = 'http://172.21.0.3:8069'
-db = 'demo'
-username = 'papamalick214@gmail.com'
-password = 'Malick2000'
+url = 'http://192.168.201.216:8069'
+db = 'Touch_db'
+username = 'admin'
+password = '1234'
  
 odoo_models, odoo_connection = connect(url, db, username, password)
 if odoo_connection and odoo_models:
@@ -62,11 +62,11 @@ def Company(models, db, uid, password, company_name):
         return None
  
 # Utilisation de la fonction Company() pour récupérer l'identifiant d'une entreprise spécifique
-url = 'http://172.21.0.3:8069'
-db = 'demo'
-username = 'papamalick214@gmail.com'
-password = 'Malick2000'
-company_name = 'Touch tech solution'
+url = 'http://192.168.201.216:8069'
+db = 'Touch_db'
+username = 'admin'
+password = '1234'
+company_name = 'Touch Tech Solution'
  
 odoo_models, odoo_connection = connect(url, db, username, password)
 if odoo_models and odoo_connection:
