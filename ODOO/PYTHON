@@ -7,13 +7,14 @@ from PIL import Image, ImageTk
 global num_var
 global Logistique
 global Production
-
+global username
+global password
+global article_code
 shift_button_state = False
 NbSouris = 0
 NbClavier = 0
 NbMoniteur = 0
-nombre_rectangles = 5
-colonnes_par_ligne = 3
+colonnes_par_ligne = 5
 
 espacement_horizontal = 80
 espacement_vertical = 80
@@ -51,11 +52,11 @@ def Validate_login():
                 print(f"L'identifiant de '{company_name}' est : {company_id}")
         Login.destroy()  # Fermez la fenêtre de connexion
         if username == "Log":
-            Logistique()  # Affichez l'interface principale
+            Logistique(username,password)  # Affichez l'interface principale
         if username == "Prod":
             Production()  # Affichez l'interface principale
 
-def Connect(url, db, username, password):   
+def Connect(url, db, username, password):
     try:
         common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
         uid = common.authenticate(db, username, password, {})
@@ -85,25 +86,79 @@ def Company(models, db, uid, password, company_name):
         print(f"Erreur lors de la recherche de l'entreprise : {e}")
         return None
 
-def Logistique():
+def get_article_name(models, db, uid, password, article_code):
+    try:
+        article_ids = models.execute_kw(db, uid, password,
+                                        'product.template', 'search',
+                                        [[('default_code', '=', article_code)]],
+                                        {'limit': 1})
+        if article_ids:
+            article_data = models.execute_kw(db, uid, password,
+                                             'product.template', 'read',
+                                             [article_ids], {'fields': ['name']})
+            if article_data:
+                return article_data[0]['name']
+            else:
+                print(f"Article avec le code '{article_code}' trouvé mais impossible de récupérer le nom.")
+                return None
+    except Exception as e:
+        print(f"Erreur lors de la recherche de l'article : {e}")
+        return None
+
+def get_article_price(models, db, uid, password, article_name):
+    try:
+        article_data = models.execute_kw(db, uid, password,
+                                         'product.template', 'search_read',
+                                         [[('name', '=', article_name)]],
+                                         {'fields': ['default_code', 'list_price'], 'limit': 1})
+        if article_data:
+            return {
+                'price': article_data[0]['list_price']
+            }
+        else:
+            print(f"Article '{article_name}' trouvé mais impossible de récupérer les informations.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la recherche de l'article : {e}")
+        return None
+
+def Logistique(username,password):
     Logistique = tk.Tk()
     Logistique.title("Logistique")
     set_fullscreen(Logistique)
  
     cadre_principal = ttk.Frame(Logistique, padding="10")
     cadre_principal.place(relx=0.5, rely=0.5, anchor="center")
- 
-    for i in range(nombre_rectangles):
+    article_code=80001
+
+    for i in range(10000):
+        if i == 0:
+            odoo_models, odoo_connection = Connect(url, db, username, password)
+        article_name = get_article_name(odoo_connection, db, 2, password, article_code + i)
+
+        if not article_name:
+            print(f"Article avec le code '{article_code + i}' non trouvé.")
+            break  # Arrête la boucle si l'article n'est pas trouvé
+
+        article_price = get_article_price(odoo_connection, db, 2, password, article_name)
+
+        if article_name:
+            print(f"Le nom de l'article avec le code '{article_code + i}' est : {article_name}")
+            print(f"Le prix de l'article avec le code '{article_code + i}' est : {article_price}")
+
+                
+            # Création du cadre seulement si l'article est trouvé
         cadre_texte = ttk.Frame(cadre_principal)
         cadre_texte.grid(row=i // colonnes_par_ligne, column=i % colonnes_par_ligne, padx=espacement_horizontal, pady=espacement_vertical)
-    
-        texte = "Nom article\nPrix\nNuméro article"
+        texte = article_name,article_price,article_code + i
         zone_texte = tk.Text(cadre_texte, wrap="word", height=3, width=15, font=("Arial", 12))
         zone_texte.insert("1.0", texte)
         zone_texte.configure(state="disabled")
-        zone_texte.pack()
+        zone_texte.pack()       
 
-# Bouton de fermeture en haut à droite
+
+
+        # Bouton de fermeture en haut à droite
     close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=2, bg="blue", fg="white")
     close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
 
