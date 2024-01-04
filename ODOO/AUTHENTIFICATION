@@ -21,39 +21,15 @@ url = 'http://192.168.201.216:8069'
 db = 'Touch_db'
 username = 'admin'
 password = '1234'
- 
-odoo_models, odoo_connection = connect(url, db, username, password)
-if odoo_connection and odoo_models:
-    print("Connexion réussie à Odoo")
- 
-    #model_name = 'res.partner'
-    #partner_ids = odoo_connection.execute_kw(db, 2, password, model_name, 'search', [[]])
-    #partners = odoo_connection.execute_kw(db, 2, password, model_name, 'read', [partner_ids])
- 
-    #for partner in partners:
-        #print(partner)
- 
+
 def Company(models, db, uid, password, company_name):
-    """
-    Récupère l'identifiant d'une entreprise dans les modèles Odoo en fonction du nom de l'entreprise.
-    
-    Args:
-    - models: L'objet ServerProxy pour accéder aux modèles Odoo
-    - db: Nom de la base de données Odoo
-    - uid: Identifiant de l'utilisateur Odoo
-    - password: Mot de passe de l'utilisateur Odoo
-    - company_name: Nom de l'entreprise
-    
-    Returns:
-    - L'identifiant de l'entreprise (company_id) si trouvé, sinon None
-    """
     try:
         company_id = models.execute_kw(db, uid, password,
                                        'res.company', 'search',
                                        [[('name', '=', company_name)]],
                                        {'limit': 1})
         if company_id:
-            return company_id[0]  # Renvoie le premier élément trouvé
+            return company_id[0]
         else:
             print(f"Entreprise '{company_name}' non trouvée.")
             return None
@@ -61,11 +37,6 @@ def Company(models, db, uid, password, company_name):
         print(f"Erreur lors de la recherche de l'entreprise : {e}")
         return None
  
-# Utilisation de la fonction Company() pour récupérer l'identifiant d'une entreprise spécifique
-url = 'http://192.168.201.216:8069'
-db = 'Touch_db'
-username = 'admin'
-password = '1234'
 company_name = 'Touch Tech Solution'
  
 odoo_models, odoo_connection = connect(url, db, username, password)
@@ -74,3 +45,20 @@ if odoo_models and odoo_connection:
     company_id = Company(odoo_connection, db, 2, password, company_name)
     if company_id:
         print(f"L'identifiant de '{company_name}' est : {company_id}")
+
+# Liste des noms de fichiers d'images
+    image_files = ["Clavier.jpg", "Souris.jpg", "Moniteur.jpg"]  # Ajoutez les noms de vos fichiers d'images
+
+# Liste pour stocker les objets PhotoImage
+    image_tk_list = []
+
+# Charger et convertir chaque image en PhotoImage de Tkinter
+    for filename in image_files:
+        image_pil = Image.open(filename)
+        image_tk = ImageTk.PhotoImage(image_pil)
+        image_tk_list.append(image_tk)
+
+# Créer des widgets Label pour chaque image et les positionner côte à côte
+    for image_tk in image_tk_list:
+        label = tk.Label(Production,image=image_tk)
+        label.pack(side=tk.BOTTOM, padx=0, pady=20)  # Affichage côte à côte avec un padding

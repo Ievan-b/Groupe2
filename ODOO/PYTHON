@@ -1,19 +1,30 @@
 import tkinter as tk
+import xmlrpc.client
 from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
-shift_button_state = False
 global num_var
 global Logistique
 global Production
+
+shift_button_state = False
 NbSouris = 0
 NbClavier = 0
 NbMoniteur = 0
+nombre_rectangles = 5
+colonnes_par_ligne = 3
 
-def set_fullscreen(Logistique):
-    Logistique.attributes('-fullscreen', True)  # Activer le mode plein écran
-    Logistique.bind("<Escape>", lambda event: Logistique.attributes("-fullscreen", False))  # Pour quitter le mode plein écran en appuyant sur la touche "Échap"
+espacement_horizontal = 80
+espacement_vertical = 80
+
+url = 'http://192.168.201.216:8069'
+db = 'Touch_db'
+company_name = 'Touch Tech Solution'
+
+def set_fullscreen(Ecran):
+    Ecran.attributes('-fullscreen', True)  # Activer le mode plein écran
+    Ecran.bind("<Escape>", lambda event: Ecran.attributes("-fullscreen", False))  # Pour quitter le mode plein écran en appuyant sur la touche "Échap"
 
 def button_click(button_number):
     global shift_button_state
@@ -25,76 +36,75 @@ def on_closing(window_to_close):
     window_to_close.destroy()
 
 def Validate_login():
+
     # Récupérez les informations saisies par l'utilisateur
     username = username_entry.get()
     password = password_entry.get()
     
     # Vérifiez les informations (vous pouvez ajouter votre propre logique de vérification ici)
-    if username == "1" and password == "1":
+    if Connect(url, db, username, password) != None: 
+        odoo_models, odoo_connection = Connect(url, db, username, password)
+        if odoo_models and odoo_connection:
+            print("Connexion réussie à Odoo")
+            company_id = Company(odoo_connection, db, 2, password, company_name)
+            if company_id:
+                print(f"L'identifiant de '{company_name}' est : {company_id}")
         Login.destroy()  # Fermez la fenêtre de connexion
-        Logistique()  # Affichez l'interface principale
-    else:
-        messagebox.showerror("Erreur", "Nom d'utilisateur ou mot de passe incorrect!")
+        if username == "Log":
+            Logistique()  # Affichez l'interface principale
+        if username == "Prod":
+            Production()  # Affichez l'interface principale
+
+def Connect(url, db, username, password):   
+    try:
+        common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(url))
+        uid = common.authenticate(db, username, password, {})
+        if uid:
+            models = xmlrpc.client.ServerProxy('{}/xmlprc/2/objects'.format(url))
+            return models,xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(url))
+        else:
+            print("Connexion échouée : Authentification impossible")
+            messagebox.showerror("Erreur", "Nom d'utilisateur ou mot de passe incorrect!")
+            return None
+    except Exception as e:
+        print(f"Erreur de connexion : {e}")
+        return None
+
+def Company(models, db, uid, password, company_name):
+    try:
+        company_id = models.execute_kw(db, uid, password,
+                                       'res.company', 'search',
+                                       [[('name', '=', company_name)]],
+                                       {'limit': 1})
+        if company_id:
+            return company_id[0]
+        else:
+            print(f"Entreprise '{company_name}' non trouvée.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la recherche de l'entreprise : {e}")
+        return None
 
 def Logistique():
     Logistique = tk.Tk()
     Logistique.title("Logistique")
     set_fullscreen(Logistique)
-
-# Création d'un canevas pour les formes
-    canvas = tk.Canvas(Logistique, width=Logistique.winfo_reqwidth(), height=Logistique.winfo_reqheight())
-    canvas.pack(fill=tk.BOTH, expand=True)
-
-# Création de boutons avec place
-    button1 = tk.Button(Logistique, text="-", command=lambda: button_click(1), width=10, height=3, bg="#999999", fg="white")
-    button1.place(relx=0.65, rely=0.35, anchor=tk.W)
-
-    button2 = tk.Button(Logistique, text="+", command=lambda: button_click(2), width=10, height=3, bg="#999999", fg="white")
-    button2.place(relx=0.85, rely=0.35, anchor=tk.W)
-
-    button3 = tk.Button(Logistique, text="-", command=lambda: button_click(3), width=10, height=3, bg="#999999", fg="white")
-    button3.place(relx=0.65, rely=0.60, anchor=tk.W)
-
-    button4 = tk.Button(Logistique, text="+", command=lambda: button_click(4), width=10, height=3, bg="#999999", fg="white")
-    button4.place(relx=0.85, rely=0.60, anchor=tk.W)
-
-    button5 = tk.Button(Logistique, text="-", command=lambda: button_click(5), width=10, height=3, bg="#999999", fg="white")
-    button5.place(relx=0.65, rely=0.85, anchor=tk.W)
-
-    button6 = tk.Button(Logistique, text="+", command=lambda: button_click(6), width=10, height=3, bg="#999999", fg="white")
-    button6.place(relx=0.85, rely=0.85, anchor=tk.W) 
-
-# Création du premier widget Label pour NbSouris
-    label_souris = tk.Label(Logistique, text=f"{NbSouris}", font=("Arial", 14))
-    label_souris.place(relx=0.78, rely=0.35, anchor=tk.W)
-
-# Création du deuxième widget Label pour NbClavier
-    label_clavier = tk.Label(Logistique, text=f"{NbClavier}", font=("Arial", 14))
-    label_clavier.place(relx=0.78, rely=0.60, anchor=tk.W)
-
-# Création du troisième widget Label pour NbMoniteur
-    label_moniteur = tk.Label(Logistique, text=f"{NbMoniteur}", font=("Arial", 14))
-    label_moniteur.place(relx=0.78, rely=0.85, anchor=tk.W)
-
-# Liste des noms de fichiers d'images
-    image_files = ["Clavier.jpg", "Souris.jpg", "Moniteur.jpg"]  # Ajoutez les noms de vos fichiers d'images
-
-# Liste pour stocker les objets PhotoImage
-    image_tk_list = []
-
-# Charger et convertir chaque image en PhotoImage de Tkinter
-    for filename in image_files:
-        image_pil = Image.open(filename)
-        image_tk = ImageTk.PhotoImage(image_pil)
-        image_tk_list.append(image_tk)
-
-# Créer des widgets Label pour chaque image et les positionner côte à côte
-    for image_tk in image_tk_list:
-        label = tk.Label(Logistique,image=image_tk)
-        label.pack(side=tk.BOTTOM, padx=0, pady=20)  # Affichage côte à côte avec un padding
+ 
+    cadre_principal = ttk.Frame(Logistique, padding="10")
+    cadre_principal.place(relx=0.5, rely=0.5, anchor="center")
+ 
+    for i in range(nombre_rectangles):
+        cadre_texte = ttk.Frame(cadre_principal)
+        cadre_texte.grid(row=i // colonnes_par_ligne, column=i % colonnes_par_ligne, padx=espacement_horizontal, pady=espacement_vertical)
+    
+        texte = "Nom article\nPrix\nNuméro article"
+        zone_texte = tk.Text(cadre_texte, wrap="word", height=3, width=15, font=("Arial", 12))
+        zone_texte.insert("1.0", texte)
+        zone_texte.configure(state="disabled")
+        zone_texte.pack()
 
 # Bouton de fermeture en haut à droite
-    close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=2, bg="red", fg="white")
+    close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=2, bg="blue", fg="white")
     close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
 
 def Production():
@@ -137,26 +147,9 @@ def Production():
     label_moniteur = tk.Label(Production, text=f"{NbMoniteur}", font=("Arial", 14))
     label_moniteur.place(relx=0.78, rely=0.85, anchor=tk.W)
 
-# Liste des noms de fichiers d'images
-    image_files = ["Clavier.jpg", "Souris.jpg", "Moniteur.jpg"]  # Ajoutez les noms de vos fichiers d'images
-
-# Liste pour stocker les objets PhotoImage
-    image_tk_list = []
-
-# Charger et convertir chaque image en PhotoImage de Tkinter
-    for filename in image_files:
-        image_pil = Image.open(filename)
-        image_tk = ImageTk.PhotoImage(image_pil)
-        image_tk_list.append(image_tk)
-
-# Créer des widgets Label pour chaque image et les positionner côte à côte
-    for image_tk in image_tk_list:
-        label = tk.Label(Production,image=image_tk)
-        label.pack(side=tk.BOTTOM, padx=0, pady=20)  # Affichage côte à côte avec un padding
-
 # Bouton de fermeture en haut à droite
     close_button = tk.Button(Production, text="Quit", command=lambda: on_closing(Production), width=10, height=2, bg="red", fg="white")
-    close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
+    close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)
 
 # Création de la fenêtre de connexion (popup)
 Login = tk.Tk()
