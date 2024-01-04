@@ -1,6 +1,6 @@
 # Touch Tech Solution - ERP Odoo
 
-![Logo Touch Tech Solution](images/Logo TouchTech Solutions.png)
+![Logo Touch Tech Solution](Logo TouchTech Solutions.png)
 
 ## Description
 
