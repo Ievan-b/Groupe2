@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox  # Importer le module ttk pour des styles améliorés
-from PIL import Image, ImageTk # Importez les classes nécessaires de Pillow
+from tkinter import messagebox
+from PIL import Image, ImageTk
 
-# Variable pour suivre l'état du bouton SHIFT
 shift_button_state = False
 global num_var
 global Logistique
@@ -16,12 +15,10 @@ def set_fullscreen(Logistique):
     Logistique.attributes('-fullscreen', True)  # Activer le mode plein écran
     Logistique.bind("<Escape>", lambda event: Logistique.attributes("-fullscreen", False))  # Pour quitter le mode plein écran en appuyant sur la touche "Échap"
 
-# Fonction appelée lorsqu'un bouton est cliqué
 def button_click(button_number):
     global shift_button_state
     shift_button_state = not shift_button_state
 
-# Fonction appelée lors de la fermeture de la fenêtre
 def on_closing(window_to_close):
     print("Fermeture de la fenêtre demandée...")
     window_to_close.attributes('-fullscreen', False)
@@ -38,15 +35,6 @@ def Validate_login():
         Logistique()  # Affichez l'interface principale
     else:
         messagebox.showerror("Erreur", "Nom d'utilisateur ou mot de passe incorrect!")
-
-
-
-
-
-
-
-
-
 
 def Logistique():
     Logistique = tk.Tk()
@@ -109,8 +97,6 @@ def Logistique():
     close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=2, bg="red", fg="white")
     close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
 
-
-
 def Production():
     Production = tk.Tk()
     Production.title("Production")
@@ -171,11 +157,6 @@ def Production():
 # Bouton de fermeture en haut à droite
     close_button = tk.Button(Production, text="Quit", command=lambda: on_closing(Production), width=10, height=2, bg="red", fg="white")
     close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
-
-
-
-
-
 
 # Création de la fenêtre de connexion (popup)
 Login = tk.Tk()
