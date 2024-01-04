@@ -1,9 +1,9 @@
 # Touch Tech Solution - ERP Odoo
 
-![Logo Touch Tech Solution](images/logo.png)
+![Logo Touch Tech Solution](images/Logo_TouchTech_Solutions.png)
 
 ## Description
-.
+
 Touch Tech Solution est une entreprise spécialisée dans l'achat-revente de souris et clavier pour ordinateur. Ce référentiel contient le fichiers Python nécessaires pour traiter et afficher les données de la base de données de l'ERP Odoo.
 
 ## Contenu
