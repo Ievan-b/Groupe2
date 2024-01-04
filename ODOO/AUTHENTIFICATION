@@ -148,10 +148,13 @@ if odoo_models and odoo_connection:
         print(f"Le nom de l'article avec le code '{article_code}' est : {article_name}")
 
 
-        ################################################
+        ###############################################
+
+
+    #############################################################
 def get_article_info(models, db, uid, password, article_name):
     """
-    Récupère le code et le prix d'un article dans les modèles Odoo en fonction du nom de l'article.
+    Récupère le code, le prix et la quantité en stock d'un article dans les modèles Odoo en fonction du nom de l'article.
     
     Args:
     - models: L'objet ServerProxy pour accéder aux modèles Odoo
@@ -161,18 +164,19 @@ def get_article_info(models, db, uid, password, article_name):
     - article_name: Nom de l'article
     
     Returns:
-    - Un dictionnaire contenant le code et le prix de l'article si trouvé, sinon None
+    - Un dictionnaire contenant le code, le prix et la quantité en stock de l'article si trouvé, sinon None
     """
     try:
         product_id = find_product_id(models, db, uid, password, article_name)
         if product_id:
             article_data = models.execute_kw(db, uid, password,
                                              'product.product', 'read',
-                                             [product_id], {'fields': ['default_code', 'list_price']})
+                                             [product_id], {'fields': ['default_code', 'list_price', 'qty_available']})
             if article_data:
                 return {
                     'code': article_data[0]['default_code'],
-                    'price': article_data[0]['list_price']
+                    'price': article_data[0]['list_price'],
+                    'quantity_available': article_data[0]['qty_available']
                 }
             else:
                 print(f"Article '{article_name}' trouvé mais impossible de récupérer les informations.")
@@ -184,13 +188,55 @@ def get_article_info(models, db, uid, password, article_name):
         print(f"Erreur lors de la recherche de l'article : {e}")
         return None
 
-# Utilisation de la fonction get_article_info() pour récupérer le code et le prix d'un article spécifique
+# Utilisation de la fonction get_article_info() pour récupérer le code, le prix et la quantité en stock d'un article spécifique
 article_name_to_find = 'Clavier Corsaire RGB'
 article_info = get_article_info(odoo_connection, db, 2, password, article_name_to_find)
 if article_info:
     print(f"Informations sur l'article '{article_name_to_find}':")
     print(f"Code: {article_info['code']}")
     print(f"Prix: {article_info['price']}")
+    print(f"Quantité en stock: {article_info['quantity_available']}")
+#########################################################################################
+def update_stock_quantity(models, db, uid, password, article_code, new_quantity):
+    """
+    Met à jour la quantité en stock d'un article dans les modèles Odoo en fonction du code de l'article.
+    
+    Args:
+    - models: L'objet ServerProxy pour accéder aux modèles Odoo
+    - db: Nom de la base de données Odoo
+    - uid: Identifiant de l'utilisateur Odoo
+    - password: Mot de passe de l'utilisateur Odoo
+    - article_code: Code de l'article à mettre à jour
+    - new_quantity: Nouvelle quantité à définir
+    
+    Returns:
+    - True si la mise à jour a été effectuée avec succès, sinon False
+    """
+    try:
+        product_id = find_product_id(models, db, uid, password, article_code)
+        if product_id:
+            models.execute_kw(db, uid, password,
+                              'product.product', 'write',
+                              [[product_id], {'qty_available': new_quantity}])
+            print(f"Quantité en stock de l'article '{article_code}' mise à jour avec succès.")
+            return True
+        else:
+            print(f"Article avec le code '{article_code}' non trouvé.")
+            return False
+    except Exception as e:
+        print(f"Erreur lors de la mise à jour de la quantité en stock : {e}")
+        return False
+
+# Utilisation de la fonction update_stock_quantity() pour modifier la quantité en stock d'un article spécifique
+article_code_to_update = 'Clavier Corsaire RGB'
+new_stock_quantity = 50  # Remplacez ceci par la nouvelle quantité
+
+update_result = update_stock_quantity(odoo_connection, db, 2, password, article_code_to_update, new_stock_quantity)
+if update_result:
+    print(f"Quantité en stock mise à jour avec succès pour l'article '{article_code_to_update}'.")
+else:
+    print(f"Échec de la mise à jour de la quantité en stock pour l'article '{article_code_to_update}'. Vérifiez les erreurs affichées.")
+
 
 
 
