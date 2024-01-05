@@ -23,10 +23,16 @@ la procédure d'installation de l'ERP sous linux est la suivante:
 - se connecter à portainer.io avec les identifiant suivant:
   Identifiant : admin
   mot de passe : portainer
-une fois connecter à portainer.io, il s'agit de créer les containers en le nommant "odoo" et en y appliquant le le contenue du fichier joint "docker-compose.yml". Selectionner la méthode de construction "Web editor" puis finaliser la configuration des containers avec 
+une fois connecter à portainer.io, il s'agit de créer les containers en le nommant "odoo" et en y appliquant le le contenue du fichier joint "docker-compose.yml". Selectionner la méthode de construction "Web editor" puis finaliser la configuration des containers avec le bouton de validation. 
 
 - Une fois avoir créer les deux container il faut les passer en mode "running"
-- 
+- Au premier lancement, le serveur demande de rentrer des identifiant qui sont les suivants dans notre aplication:
+  Master Password : MSIR5
+  Database Name : Touch_db
+  Email : admin
+  Password : 1234
+
+- une fois que cela est fait il faut importer les data du fichier Zip joint dans le GIT.
 
 
 ## Fichiers Python
