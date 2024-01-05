@@ -124,37 +124,6 @@ if odoo_models and odoo_connection:
 
 
         ###############################################
-def update_stock(models, db, uid, password, product_id, new_stock_quantity):
-    try:
-        stock_quant = models.execute_kw(
-            db, uid, password,
-            'stock.quant', 'search',
-            [[('product_id', '=', product_id)]],
-            {'limit': 1}
-        )
-
-        if stock_quant:
-            # Mettre à jour la quantité en stock
-            models.execute_kw(
-                db, uid, password,
-                'stock.quant', 'write',
-                [stock_quant, {'quantity': new_stock_quantity}]
-            )
-            print(f"Stock du produit avec l'ID {product_id} mis à jour à {new_stock_quantity}")
-        else:
-            print(f"Produit avec l'ID {product_id} non trouvé dans le stock.")
-
-    except Exception as e:
-        print(f"Erreur lors de la mise à jour du stock : {e}")
-
-# Remplacer ces valeurs par les informations réelles de votre produit et de la nouvelle quantité
-product_id = 7  # ID de votre produit
-new_stock_quantity = 50  # Nouvelle quantité en stock que vous souhaitez définir
-
-odoo_models, odoo_connection = connect(url, db, username, password)
-if odoo_models and odoo_connection:
-    print("Connexion réussie à Odoo")
-    update_stock(odoo_connection, db, 2, password, product_id, new_stock_quantity)
 
 
 
@@ -204,41 +173,22 @@ if article_info:
     print(f"Prix: {article_info['price']}")
     print(f"Quantité en stock: {article_info['quantity_available']}")
 #########################################################################################
-def get_article_image(models, db, uid, password, article_id):
-    """
-    Récupère l'image d'un article dans les modèles Odoo en fonction de l'ID de l'article.
-    
-    Args:
-    - models: L'objet ServerProxy pour accéder aux modèles Odoo
-    - db: Nom de la base de données Odoo
-    - uid: Identifiant de l'utilisateur Odoo
-    - password: Mot de passe de l'utilisateur Odoo
-    - article_id: ID de l'article
-    
-    Returns:
-    - Les données binaires de l'image si trouvée, sinon None
-    """
+
+
+def update_stock_quantity(models, db, uid, password, product_name, new_quantity):
     try:
-        article_data = models.execute_kw(db, uid, password,
-                                         'product.product', 'read',
-                                         [article_id], {'fields': ['image']})
-        if article_data and article_data[0].get('image'):
-            return article_data[0]['image']
+        product_id = find_product_id(models, db, uid, password, product_name)
+        if product_id:
+            # Mettre à jour la quantité en stock de l'article
+            models.execute_kw(db, uid, password,
+                              'product.product', 'write',
+                              [[product_id], {'qty_available': new_quantity}])
+            print(f"La quantité en stock de '{product_name}' a été mise à jour avec succès.")
         else:
-            print(f"Image pour l'article avec l'ID '{article_id}' non trouvée.")
-            return None
+            print(f"Article '{product_name}' non trouvé.")
     except Exception as e:
-        print(f"Erreur lors de la récupération de l'image de l'article : {e}")
-        return None
+        print(f"Erreur lors de la mise à jour de la quantité en stock : {e}")
+article_name_to_update = 'Clavier Corsaire RGB'  # Remplacez ceci par le nom de l'article que vous souhaitez mettre à jour
+new_stock_quantity = 50  # Remplacez ceci par la nouvelle quantité en stock
 
-# Utilisation de la fonction get_article_image() pour récupérer l'image d'un article spécifique
-article_id_to_fetch_image = 7  # Remplacez ceci par l'ID de l'article que vous souhaitez récupérer
-
-article_image_data = get_article_image(odoo_connection, db, 2, password, article_id_to_fetch_image)
-
-if article_image_data:
-    with open('article_image.jpg', 'wb') as image_file:
-        image_file.write(article_image_data)
-    print("Image de l'article récupérée avec succès et enregistrée en tant que 'article_image.jpg'.")
-else:
-    print(f"Impossible de récupérer l'image de l'article avec l'ID '{article_id_to_fetch_image}'.")
+update_stock_quantity(odoo_connection, db, 2, password, article_name_to_update, new_stock_quantity)
