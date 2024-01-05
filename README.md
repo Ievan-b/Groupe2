@@ -17,6 +17,17 @@ Touch Tech Solution est une entreprise spécialisée dans l'achat-revente de sou
 ## Odoo ERP
 
 Odoo, notre système ERP, sert de base de données centralisée pour la gestion des stocks des articles. Les processus de gestion des ordres de production et des sorties de stock sont pris en charge de manière personnalisée à l'aide d'une application Python dédiée.
+Afin de procéder à la configuration de l'ERP nous avons mis à disposition un fichier ".zip" contenant les données concernant la base de données ainsi que le fichier "docker-compose.yml" qui possède l'ensemble des configuration et parametre nécessaire au portainer.
+la procédure d'installation de l'ERP sous linux est la suivante:
+-ce connecter au réseau Wifi Guest
+- se connecter à portainer.io avec les identifiant suivant:
+  Identifiant : admin
+  mot de passe : portainer
+une fois connecter à portainer.io, il s'agit de créer les containers en le nommant "odoo" et en y appliquant le le contenue du fichier joint "docker-compose.yml". Selectionner la méthode de construction "Web editor" puis finaliser la configuration des containers avec 
+
+- Une fois avoir créer les deux container il faut les passer en mode "running"
+- 
+
 
 ## Fichiers Python
 
