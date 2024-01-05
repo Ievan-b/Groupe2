@@ -81,7 +81,7 @@ def find_product_id(models, db, uid, password, product_name):
         return None
 
 # Utilisation de la fonction pour trouver l'identifiant d'un article spécifique
-product_name = 'Souris gameur'  # Remplacez ceci par le nom de votre article
+product_name = 'Souris Logitech 2.4g'  # Remplacez ceci par le nom de votre article
 product_id = find_product_id(odoo_connection, db, 2, password, product_name)
 if product_id:
     print(f"L'identifiant de '{product_name}' est : {product_id}")
@@ -192,3 +192,95 @@ article_name_to_update = 'Clavier Corsaire RGB'  # Remplacez ceci par le nom de 
 new_stock_quantity = 50  # Remplacez ceci par la nouvelle quantité en stock
 
 update_stock_quantity(odoo_connection, db, 2, password, article_name_to_update, new_stock_quantity)
+###################################################################################################
+#####Ordre  de Fabrication###################################""
+def get_manufacturing_order_date(models, db, uid, password, article_id):
+    """
+    Récupère la date de l'ordre de fabrication associé à un article spécifique dans Odoo.
+    
+    Args:
+    - models: L'objet ServerProxy pour accéder aux modèles Odoo
+    - db: Nom de la base de données Odoo
+    - uid: Identifiant de l'utilisateur Odoo
+    - password: Mot de passe de l'utilisateur Odoo
+    - article_id: ID de l'article
+    
+    Returns:
+    - La date de l'ordre de fabrication de l'article ou None si aucun ordre n'est trouvé
+    """
+    try:
+        # Recherche des ordres de fabrication associés à l'article
+        manufacturing_orders = models.execute_kw(
+            db, uid, password,
+            'mrp.production', 'search_read',
+            [[('product_id', '=', article_id)]],
+            {'fields': ['date_planned_start'], 'limit': 1}
+        )
+        if manufacturing_orders:
+            return manufacturing_orders[0]['date_planned_start']
+        else:
+            print(f"Aucun ordre de fabrication trouvé pour l'article avec l'ID '{article_id}'.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la récupération de la date de fabrication : {e}")
+        return None
+
+# Utilisation de la fonction get_manufacturing_order_date() pour obtenir la date de fabrication d'un article spécifique
+article_id_to_fetch_date = 12  # Remplacez ceci par l'ID de l'article que vous souhaitez vérifier
+
+manufacturing_order_date = get_manufacturing_order_date(odoo_connection, db, 2, password, article_id_to_fetch_date)
+if manufacturing_order_date:
+    print(f"Date de l'ordre de fabrication pour l'article avec l'ID '{article_id_to_fetch_date}': {manufacturing_order_date}")
+else:
+    print(f"Aucune date d'ordre de fabrication trouvée pour l'article avec l'ID '{article_id_to_fetch_date}'.")
+
+
+##################################################################################################
+################recupération de la quantité produite.
+    
+def get_manufacturing_order_details(models, db, uid, password, article_id):
+    """
+    Récupère les détails de l'ordre de fabrication associé à un article spécifique dans Odoo.
+    
+    Args:
+    - models: L'objet ServerProxy pour accéder aux modèles Odoo
+    - db: Nom de la base de données Odoo
+    - uid: Identifiant de l'utilisateur Odoo
+    - password: Mot de passe de l'utilisateur Odoo
+    - article_id: ID de l'article
+    
+    Returns:
+    - Un dictionnaire contenant les détails de l'ordre de fabrication (date, quantité produite et quantité à produire) ou None si aucun ordre n'est trouvé
+    """
+    try:
+        # Recherche des ordres de fabrication associés à l'article
+        manufacturing_orders = models.execute_kw(
+            db, uid, password,
+            'mrp.production', 'search_read',
+            [[('product_id', '=', article_id)]],
+            {'fields': ['date_planned_start', 'qty_producing', 'product_qty'], 'limit': 1}
+        )
+        if manufacturing_orders:
+            return {
+                'date_planned_start': manufacturing_orders[0]['date_planned_start'],
+                'quantity_produced': manufacturing_orders[0]['qty_producing'],
+                'quantity_to_produce': manufacturing_orders[0]['product_qty']
+            }
+        else:
+            print(f"Aucun ordre de fabrication trouvé pour l'article avec l'ID '{article_id}'.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la récupération des détails de l'ordre de fabrication : {e}")
+        return None
+
+# Utilisation de la fonction get_manufacturing_order_details() pour obtenir les détails de l'ordre de fabrication pour un article spécifique
+article_id_to_fetch_details = 10  # Remplacez ceci par l'ID de l'article que vous souhaitez vérifier
+
+manufacturing_order_details = get_manufacturing_order_details(odoo_connection, db, 2, password, article_id_to_fetch_details)
+if manufacturing_order_details:
+    print(f"Détails de l'ordre de fabrication pour l'article avec l'ID '{article_id_to_fetch_details}':")
+    print(f"Date de début prévue: {manufacturing_order_details['date_planned_start']}")
+    print(f"Quantité produite: {manufacturing_order_details['quantity_produced']}")
+    print(f"Quantité à produire: {manufacturing_order_details['quantity_to_produce']}")
+else:
+    print(f"Aucun détail d'ordre de fabrication trouvé pour l'article avec l'ID '{article_id_to_fetch_details}'.")

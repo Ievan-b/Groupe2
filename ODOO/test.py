@@ -28,7 +28,7 @@ print(f"Manufactoring Order write access rights : {access}")
 product_id = 7  # Remplacez ceci par l'ID de votre article
 
 # Nouvelle quantité pour l'article
-new_quantity = 50  # Remplacez ceci par la nouvelle quantité
+new_quantity = 2  # Remplacez ceci par la nouvelle quantité
 
 # Recherche de l'article dans Odoo
 article = models.execute_kw(erp_db, user_id, erp_pwd,
