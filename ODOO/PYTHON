@@ -1,5 +1,7 @@
 import tkinter as tk
 import xmlrpc.client
+import base64
+import io
 from tkinter import ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -16,8 +18,8 @@ NbClavier = 0
 NbMoniteur = 0
 colonnes_par_ligne = 5
 
-espacement_horizontal = 80
-espacement_vertical = 80
+espacement_horizontal = 10
+espacement_vertical = 10
 
 url = 'http://192.168.201.216:8069'
 db = 'Touch_db'
@@ -54,7 +56,7 @@ def Validate_login():
         if username == "Log":
             Logistique(username,password)  # Affichez l'interface principale
         if username == "Prod":
-            Production()  # Affichez l'interface principale
+            Production(username,password)  # Affichez l'interface principale
 
 def Connect(url, db, username, password):
     try:
@@ -110,10 +112,10 @@ def get_article_price(models, db, uid, password, article_name):
         article_data = models.execute_kw(db, uid, password,
                                          'product.template', 'search_read',
                                          [[('name', '=', article_name)]],
-                                         {'fields': ['default_code', 'list_price'], 'limit': 1})
+                                         {'fields': ['list_price'], 'limit': 1})
         if article_data:
             return {
-                'price': article_data[0]['list_price']
+                'price': article_data[0]['list_price'],
             }
         else:
             print(f"Article '{article_name}' trouvé mais impossible de récupérer les informations.")
@@ -121,90 +123,201 @@ def get_article_price(models, db, uid, password, article_name):
     except Exception as e:
         print(f"Erreur lors de la recherche de l'article : {e}")
         return None
+    
+def get_article_stock(models, db, uid, password, article_name):
+    try:
+        article_data = models.execute_kw(db, uid, password,
+                                         'product.template', 'search_read',
+                                         [[('name', '=', article_name)]],
+                                         {'fields': ['qty_available'], 'limit': 1})
+        if article_data:
+            return article_data[0]['qty_available']
+        else:
+            print(f"Article '{article_name}' trouvé mais impossible de récupérer la quantité.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la recherche de la quantité de l'article : {e}")
+        return None
 
-def Logistique(username,password):
+def get_ordre_de_fab(models, db, uid, password, article_id):
+    try:
+        manufacturing_orders = models.execute_kw(
+            db, uid, password,
+            'mrp.production', 'search_read',
+            [[('product_id', '=', article_id)]],
+            {'fields': ['date_planned_start', 'qty_producing', 'product_qty', 'product_id'], 'limit': 1}
+        )
+        if manufacturing_orders:
+            return {
+                'date_planned_start': manufacturing_orders[0]['date_planned_start'],
+                'quantity_produced': manufacturing_orders[0]['qty_producing'],
+                'quantity_to_produce': manufacturing_orders[0]['product_qty'],
+                'product_id': manufacturing_orders[0]['product_id']
+            }
+        else:
+            print(f"Aucun ordre de fabrication trouvé pour l'article avec l'ID '{article_id}'.")
+            return None
+    except Exception as e:
+        print(f"Erreur lors de la récupération des détails de l'ordre de fabrication : {e}")
+        return None
+
+def get_article_image(models, db, uid, password, article_name):
+    try:
+        print(f"a")
+        article_ids = models.execute_kw(db, uid, password,
+                                        'product.template', 'search',
+                                        [[('name', '=', article_name)]])
+        print(f"b")
+        if article_ids:
+            print(f"c")
+            article_data = models.execute_kw(db, uid, password,
+                                             'product.template', 'read',
+                                             [article_ids], {'fields': ['image']})
+            if article_data[0]['image']:
+                print(f"d")
+                image_base64 = article_data[0]['image']
+                return image_base64
+            else:
+                print(f"Aucune image trouvée pour l'article '{article_name}'.")
+                return None
+        else:
+            print(f"Article '{article_name}' non trouvé.")
+            return None
+    except xmlrpc.client.ProtocolError as err:
+        print(f"Erreur de protocole : {err}")  # Affichez simplement l'erreur sans essayer d'accéder à err.response
+        return None
+    
+    except Exception as e:
+        print(f"Erreur générale lors de la récupération de l'image : {e}")
+        return None
+
+def Logistique(username, password):
     Logistique = tk.Tk()
     Logistique.title("Logistique")
     set_fullscreen(Logistique)
- 
+
+    # Création de la barre latérale en haut
+    sidebar_frame = ttk.Frame(Logistique, padding="5")
+    sidebar_frame.pack(side="top", fill="x")
+
+    # Ajout d'un bouton exemple dans la barre latérale
+    example_button = tk.Button(sidebar_frame, text="Exemple", bg="gray", fg="white")
+    example_button.pack(side="left", padx=10, pady=5)
+
+    # Cadre principal pour les informations des articles
     cadre_principal = ttk.Frame(Logistique, padding="10")
-    cadre_principal.place(relx=0.5, rely=0.5, anchor="center")
-    article_code=80001
+    cadre_principal.pack(pady=10)  # Espacement par rapport à la barre latérale
+
+    article_code = 80001
+    colonnes_par_ligne = 5  # Définissez cette valeur si elle n'est pas définie ailleurs
 
     for i in range(10000):
         if i == 0:
             odoo_models, odoo_connection = Connect(url, db, username, password)
+        
         article_name = get_article_name(odoo_connection, db, 2, password, article_code + i)
 
         if not article_name:
             print(f"Article avec le code '{article_code + i}' non trouvé.")
-            break  # Arrête la boucle si l'article n'est pas trouvé
+            break
+
+        image_data = get_article_image(odoo_models, db, 2, password, article_name)
+
+        if image_data:
+            # Convertir la donnée de l'image en format compatible avec Tkinter
+            image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+            image = image.resize((100, 100), Image.ANTIALIAS)  # Redimensionnez l'image comme vous le souhaitez
+            photo = ImageTk.PhotoImage(image)
+            
+            # Créer un widget Label pour afficher l'image
+            label_image = tk.Label(cadre_principal, image=photo)
+            label_image.image = photo  # Garder une référence à l'image
+            label_image.grid(row=i, column=0)
 
         article_price = get_article_price(odoo_connection, db, 2, password, article_name)
+        article_stock = get_article_stock(odoo_connection, db, 2, password, article_name)
 
         if article_name:
             print(f"Le nom de l'article avec le code '{article_code + i}' est : {article_name}")
             print(f"Le prix de l'article avec le code '{article_code + i}' est : {article_price}")
+            print(f"Le stock de l'article avec le code '{article_code + i}' est : {article_stock}")
 
-                
-            # Création du cadre seulement si l'article est trouvé
+        # Création du cadre pour chaque article trouvé
         cadre_texte = ttk.Frame(cadre_principal)
         cadre_texte.grid(row=i // colonnes_par_ligne, column=i % colonnes_par_ligne, padx=espacement_horizontal, pady=espacement_vertical)
-        texte = article_name,article_price,article_code + i
-        zone_texte = tk.Text(cadre_texte, wrap="word", height=3, width=15, font=("Arial", 12))
+        
+        texte = f"Nom: {article_name}\nPrix: {article_price['price']}\nCode: {article_code + i}\nStock: {article_stock}"
+        zone_texte = tk.Text(cadre_texte, wrap="word", height=10, width=20, font=("Arial", 12))
         zone_texte.insert("1.0", texte)
-        zone_texte.configure(state="disabled")
-        zone_texte.pack()       
+        zone_texte.configure(state="normal")
+        zone_texte.pack()
 
+    # Bouton de fermeture en haut à droite
+    close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=1, bg="red", fg="white")
+    close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
 
+    Logistique.mainloop()
 
-        # Bouton de fermeture en haut à droite
-    close_button = tk.Button(Logistique, text="Quit", command=lambda: on_closing(Logistique), width=10, height=2, bg="blue", fg="white")
-    close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)  # ancrage à droite en haut
-
-def Production():
+def Production(username, password):
     Production = tk.Tk()
     Production.title("Production")
     set_fullscreen(Production)
 
-# Création d'un canevas pour les formes
-    canvas = tk.Canvas(Production, width=Production.winfo_reqwidth(), height=Production.winfo_reqheight())
-    canvas.pack(fill=tk.BOTH, expand=True)
 
-# Création de boutons avec place
-    button1 = tk.Button(Production, text="-", command=lambda: button_click(1), width=10, height=3, bg="#999999", fg="white")
-    button1.place(relx=0.65, rely=0.35, anchor=tk.W)
+    # Création de la barre latérale en haut
+    sidebar_frame = ttk.Frame(Production, padding="5")
+    sidebar_frame.pack(side="top", fill="x")
 
-    button2 = tk.Button(Production, text="+", command=lambda: button_click(2), width=10, height=3, bg="#999999", fg="white")
-    button2.place(relx=0.85, rely=0.35, anchor=tk.W)
+    # Ajout d'un bouton exemple dans la barre latérale
+    example_button = tk.Button(sidebar_frame, text="Exemple", bg="gray", fg="white")
+    example_button.pack(side="left", padx=10, pady=5)
 
-    button3 = tk.Button(Production, text="-", command=lambda: button_click(3), width=10, height=3, bg="#999999", fg="white")
-    button3.place(relx=0.65, rely=0.60, anchor=tk.W)
 
-    button4 = tk.Button(Production, text="+", command=lambda: button_click(4), width=10, height=3, bg="#999999", fg="white")
-    button4.place(relx=0.85, rely=0.60, anchor=tk.W)
+    # Création du Treeview pour afficher les données
+    tree = ttk.Treeview(Production, columns=("ID", "Date de début prévue", "Quantité produite", "Quantité à produire"), show="headings")
+    tree.pack(padx=10, pady=10, fill="both", expand=True)
+    
+    # Définir les en-têtes de colonne
+    tree.heading("ID", text="ID")
+    tree.heading("Date de début prévue", text="Date de début prévue")
+    tree.heading("Quantité produite", text="Quantité produite")
+    tree.heading("Quantité à produire", text="Quantité à produire")
+    
+    # Définir la largeur des colonnes
+    tree.column("ID", width=100)
+    tree.column("Date de début prévue", width=200)
+    tree.column("Quantité produite", width=150)
+    tree.column("Quantité à produire", width=150)
+    
+    for i in range(10000):
+        if i == 0:
+            odoo_models, odoo_connection = Connect(url, db, username, password)
+        
+        manufacturing_order_details = get_ordre_de_fab(odoo_connection, db, 2, password, i+1)
 
-    button5 = tk.Button(Production, text="-", command=lambda: button_click(5), width=10, height=3, bg="#999999", fg="white")
-    button5.place(relx=0.65, rely=0.85, anchor=tk.W)
+        if manufacturing_order_details:
+            # Ajouter les détails à Treeview
+            tree.insert("", "end", values=(
+                i+1,
+                manufacturing_order_details['date_planned_start'],
+                manufacturing_order_details['quantity_produced'],
+                manufacturing_order_details['quantity_to_produce'],
+                manufacturing_order_details['product_id'],
+            ))
+            print(f"Détails de l'ordre de fabrication pour l'article avec l'ID '{i+1}':")
+            print(f"Date de début prévue: {manufacturing_order_details['date_planned_start']}")
+            print(f"Quantité produite: {manufacturing_order_details['quantity_produced']}")
+            print(f"Quantité à produire: {manufacturing_order_details['quantity_to_produce']}")
+            print(f"ID: {manufacturing_order_details['product_id']}")
 
-    button6 = tk.Button(Production, text="+", command=lambda: button_click(6), width=10, height=3, bg="#999999", fg="white")
-    button6.place(relx=0.85, rely=0.85, anchor=tk.W) 
+        else:
+            print(f"Aucun détail d'ordre de fabrication trouvé pour l'article avec l'ID '{i+1}'.")
+            break
 
-# Création du premier widget Label pour NbSouris
-    label_souris = tk.Label(Production, text=f"{NbSouris}", font=("Arial", 14))
-    label_souris.place(relx=0.78, rely=0.35, anchor=tk.W)
-
-# Création du deuxième widget Label pour NbClavier
-    label_clavier = tk.Label(Production, text=f"{NbClavier}", font=("Arial", 14))
-    label_clavier.place(relx=0.78, rely=0.60, anchor=tk.W)
-
-# Création du troisième widget Label pour NbMoniteur
-    label_moniteur = tk.Label(Production, text=f"{NbMoniteur}", font=("Arial", 14))
-    label_moniteur.place(relx=0.78, rely=0.85, anchor=tk.W)
 
 # Bouton de fermeture en haut à droite
-    close_button = tk.Button(Production, text="Quit", command=lambda: on_closing(Production), width=10, height=2, bg="red", fg="white")
-    close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)
+    close_button = tk.Button(Production, text="Quit", command=lambda: on_closing(Production), width=10, height=1, bg="red", fg="white")
+    close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
 
 # Création de la fenêtre de connexion (popup)
 Login = tk.Tk()
@@ -226,8 +339,8 @@ password_entry.pack(pady=10)
 login_button = tk.Button(Login, text="Connexion", command=Validate_login)
 login_button.pack(pady=20)
 
-close_button = tk.Button(Login, text="Quit", command=lambda: on_closing(Login), width=10, height=2, bg="red", fg="white")
-close_button.place(relx=0.95, rely=0.05, anchor=tk.NE)
+close_button = tk.Button(Login, text="Quit", command=lambda: on_closing(Login), width=10, height=1, bg="red", fg="white")
+close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
 
 # Lancer la boucle principale de la fenêtre de connexion
 Login.mainloop()
