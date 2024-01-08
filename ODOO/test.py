@@ -25,30 +25,30 @@ print(f"Manufactoring Order write access rights : {access}")
 # ... (votre code existant)
 
 # ID de l'article que vous souhaitez mettre à jour
-product_id = 7  # Remplacez ceci par l'ID de votre article
+product_id = 10  # Remplacez ceci par l'ID de votre article
 
 # Nouvelle quantité pour l'article
-new_quantity = 2  # Remplacez ceci par la nouvelle quantité
+new_quantity = 50  # Remplacez ceci par la nouvelle quantité
 
 # Recherche de l'article dans Odoo
 article = models.execute_kw(erp_db, user_id, erp_pwd,
-                            'product.product', 'read',
+                            'stock.quant', 'read',
                             [[product_id]],
-                            {'fields': ['qty_available']})
+                            {'fields': ['quantity']})
 
-print(f"Ancienne quantité de l'article : {article[0]['qty_available']}")
+print(f"Ancienne quantité de l'article : {article[0]['quantity']}")
 
 # Mise à jour de la quantité de l'article
 models.execute_kw(erp_db, user_id, erp_pwd,
-                  'product.product', 'write',
-                  [[product_id], {'qty_available': new_quantity}])
+                  'stock.quant', 'write',
+                  [[product_id], {'quantity': new_quantity}])
 
 print("Quantité de l'article mise à jour avec succès!")
 
 # Vérification de la nouvelle quantité
 updated_article = models.execute_kw(erp_db, user_id, erp_pwd,
-                                    'product.product', 'read',
+                                    'stock.quant', 'read',
                                     [[product_id]],
-                                    {'fields': ['qty_available']})
+                                    {'fields': ['quantity']})
 
-print(f"Nouvelle quantité de l'article : {updated_article[0]['qty_available']}")
+print(f"Nouvelle quantité de l'article : {updated_article[0]['quantity']}")
