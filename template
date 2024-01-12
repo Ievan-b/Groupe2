@@ -4,7 +4,7 @@ from tkinterdnd2 import TkinterDnD, DND_FILES
 from PIL import Image, ImageTk
 
 # Déclaration des variables globales
-nombre_articles = 100
+nombre_articles = 16
 articles_par_page = 9
 nombre_pages = (nombre_articles + articles_par_page - 1) // articles_par_page
 espacement_horizontal = 80
