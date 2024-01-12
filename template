@@ -1,0 +1,97 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinterdnd2 import TkinterDnD, DND_FILES
+from PIL import Image, ImageTk
+
+# Déclaration des variables globales
+nombre_articles = 100
+articles_par_page = 9
+nombre_pages = (nombre_articles + articles_par_page - 1) // articles_par_page
+espacement_horizontal = 80
+espacement_vertical = 80
+colonnes_par_ligne = 3
+
+def arreter_programme():
+    fenetre.destroy()
+
+def creer_page(notebook, debut, fin):
+    page = ttk.Frame(notebook)
+    notebook.add(page, text=f"Page {len(notebook.tabs()) + 1}")
+
+    # Création d'une Frame à l'intérieur de la page pour utiliser grid
+    frame_interieur = ttk.Frame(page)
+    frame_interieur.pack(expand=True, fill="both")
+
+    for i in range(debut, fin):
+        cadre_texte = ttk.Frame(frame_interieur)
+        cadre_texte.grid(row=i % colonnes_par_ligne, column=i // colonnes_par_ligne, padx=espacement_horizontal, pady=espacement_vertical)
+
+        texte = f"Nom article {i+1}\nPrix\nNuméro article"
+        zone_texte = tk.Text(cadre_texte, wrap="word", height=3, width=15, font=("Arial", 12))
+        zone_texte.insert("1.0", texte)
+        zone_texte.configure(state="disabled")
+        zone_texte.pack()
+
+
+
+def afficher_menu(menu):
+    # Efface les onglets existants
+    for onglet in notebook.tabs():
+        notebook.forget(onglet)
+
+    # Affiche le contenu de la page en fonction du menu sélectionné
+    if menu == "Souris":
+        for i in range(0, nombre_articles, articles_par_page):
+            creer_page(notebook, i, min(i + articles_par_page, nombre_articles))
+    elif menu == "Clavier":
+        # Contenu du menu Clavier
+        pass
+    elif menu == "Création d'article":
+        creer_page(notebook, 0, 1)  # Exemple avec une page, ajustez selon vos besoins
+
+# Création de la fenêtre principale
+fenetre = TkinterDnD.Tk()
+fenetre.title("Article Details")
+
+# Définir la taille initiale de la fenêtre (ajustez selon vos besoins)
+fenetre.geometry("800x600")
+
+# Paramètres d'espacement
+espacement_horizontal = 80
+espacement_vertical = 80
+colonnes_par_ligne = 3
+
+# Création de la barre latérale bleue en haut
+sidebar_horizontal = tk.Frame(fenetre, height=50, bg='blue')
+sidebar_horizontal.pack(side='top', fill='x')
+
+# Ajout du texte "DASHBOARD" en grand dans la barre latérale
+label_dashboard = tk.Label(sidebar_horizontal, text="DASHBOARD", font=("Arial", 16), fg='white', bg='blue')
+label_dashboard.pack(side='left', padx=10, pady=10)
+
+
+# Création de la barre latérale bleue à gauche
+largeur_sidebar = 200  # Augmentez cette valeur selon vos besoins
+sidebar_vertical = tk.Frame(fenetre, bg='grey', width=largeur_sidebar)
+sidebar_vertical.pack(side='left', fill='y')
+
+# Création des boutons pour les menus
+menus = ["Souris", "Clavier", "Création d'article"]
+for menu in menus:
+    bouton_menu = tk.Button(sidebar_vertical, text=menu, command=lambda m=menu: afficher_menu(m))
+    bouton_menu.pack(side='top', pady=5)
+
+# Création du bouton Quitter
+bouton_quitter = tk.Button(sidebar_horizontal, text="Quitter", command=arreter_programme)
+bouton_quitter.pack(side="right", padx=10, pady=20)
+
+# Création du cadre principal
+cadre_principal = ttk.Frame(fenetre, padding="10")
+cadre_principal.pack(side='bottom', expand=True, fill=tk.BOTH)
+
+# Création de l'objet Notebook pour la pagination
+notebook = ttk.Notebook(cadre_principal)
+notebook.pack(expand=True, fill=tk.BOTH)
+
+# Lancement de la boucle principale Tkinter
+fenetre.mainloop()

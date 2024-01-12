@@ -16,6 +16,7 @@ def connect(url, db, username, password):
         print(f"Erreur de connexion : {e}")
         return None
  
+
  
 url = 'http://172.21.0.3:8069'
 db = 'demo'
