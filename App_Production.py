@@ -88,6 +88,7 @@ class Application(tk.Tk):
 
     def get_company_id(self, models, uid, password, company_name):
         try:
+            db = 'Touch_db'
             company_id = models.execute_kw(db, uid, password,
                                            'res.company', 'search',
                                            [[('name', '=', company_name)]],

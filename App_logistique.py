@@ -1,10 +1,12 @@
 import tkinter as tk
+from tkinter.tix import NoteBook
 import xmlrpc.client
 import base64
 import io
-from tkinter import ttk
+from tkinter import Image, ttk
 from tkinter import messagebox
-from PIL import Image, ImageTk
+from PIL import ImageTk 
+
 import os
 import math
 import sys
@@ -75,7 +77,7 @@ class SauvegardeurImageProduitOdoo:
             print(f"Erreur lors de la sauvegarde de l'image du produit : {e}")
 
 if __name__ == "__main__":
-    url = 'http://192.168.201.216:8069'
+    url = 'http://172.20.10.7:8069'
     db = 'Touch_db'
     nom_utilisateur = 'Log'
     mot_de_passe = '1234'
@@ -101,6 +103,8 @@ global username
 global password
 global article_code
 global article_stock_vars
+global article_page
+global stock_page
 article_stock_vars = []  # Liste pour stocker les variables du stock pour chaque article
 global selected_article_name
 
@@ -113,15 +117,15 @@ colonnes_par_ligne = 5
 espacement_horizontal = 10
 espacement_vertical = 10
 
-url = 'http://192.168.201.216:8069'
+url = 'http://172.20.10.7:8069'
 db = 'Touch_db'
 company_name = 'Touch Tech Solution'
 
 def show_article_page():
-    notebook.select(article_page)
+    NoteBook.select(article_page)
 
 def show_stock_page():
-    notebook.select(stock_page)
+    ttk.Notebook.select(stock_page)
 
 def set_fullscreen(Ecran):
     Ecran.attributes('-fullscreen', True)  # Activer le mode plein écran
@@ -315,6 +319,7 @@ def init_stock_page(stock_page):
 
 
 def Logistique(username, password):
+    global odoo_connection
     Logistique = tk.Tk()
     Logistique.title("Logistique")
     set_fullscreen(Logistique)

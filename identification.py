@@ -60,7 +60,7 @@ class SauvegardeurImageProduitOdoo:
             print(f"Erreur lors de la sauvegarde de l'image du produit : {e}")
 
 if __name__ == "__main__":
-    url = 'http://192.168.201.216:8069'
+    url = 'http://172.20.10.7:8069'
     db = 'Touch_db'
     nom_utilisateur = 'Log'
     mot_de_passe = '1234'
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 
 # Global variables
-url = 'http://192.168.201.216:8069'
+url = 'http://172.20.10.7:8069'
 db = 'Touch_db'
 company_name = 'Touch Tech Solution'
 
