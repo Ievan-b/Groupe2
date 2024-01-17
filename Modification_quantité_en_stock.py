@@ -25,7 +25,7 @@ print(f"Manufactoring Order write access rights : {access}")
 # ... (votre code existant)
 
 # ID de l'article que vous souhaitez mettre à jour
-product_id = 14 # Remplacez ceci par l'ID de votre article
+product_id = 3 # Remplacez ceci par l'ID de votre article
 
 # Nouvelle quantité pour l'artcle
 new_quantity = 15 # Remplacez ceci par la nouvelle quantité

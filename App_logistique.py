@@ -1,12 +1,10 @@
 import tkinter as tk
-from tkinter.tix import NoteBook
 import xmlrpc.client
 import base64
 import io
-from tkinter import Image, ttk
+from tkinter import ttk
 from tkinter import messagebox
-from PIL import ImageTk 
-
+from PIL import Image, ImageTk
 import os
 import math
 import sys
@@ -19,7 +17,6 @@ def restart_script():
     script_path = sys.argv[0]
     subprocess.Popen([python_executable, script_path])
     sys.exit()
-
 
 class SauvegardeurImageProduitOdoo:
     def __init__(self, url, db, nom_utilisateur, mot_de_passe, nom_societe):
@@ -77,7 +74,7 @@ class SauvegardeurImageProduitOdoo:
             print(f"Erreur lors de la sauvegarde de l'image du produit : {e}")
 
 if __name__ == "__main__":
-    url = 'http://172.20.10.7:8069'
+    url = 'http://192.168.201.216:8069'
     db = 'Touch_db'
     nom_utilisateur = 'Log'
     mot_de_passe = '1234'
@@ -103,10 +100,8 @@ global username
 global password
 global article_code
 global article_stock_vars
-global article_page
-global stock_page
 article_stock_vars = []  # Liste pour stocker les variables du stock pour chaque article
-global selected_article_name
+
 
 shift_button_state = False
 NbSouris = 0
@@ -117,15 +112,15 @@ colonnes_par_ligne = 5
 espacement_horizontal = 10
 espacement_vertical = 10
 
-url = 'http://172.20.10.7:8069'
+url = 'http://192.168.201.216:8069'
 db = 'Touch_db'
 company_name = 'Touch Tech Solution'
 
 def show_article_page():
-    NoteBook.select(article_page)
+    notebook.select(article_page)
 
 def show_stock_page():
-    ttk.Notebook.select(stock_page)
+    notebook.select(stock_page)
 
 def set_fullscreen(Ecran):
     Ecran.attributes('-fullscreen', True)  # Activer le mode plein écran
@@ -229,7 +224,7 @@ def get_article_price(models, db, uid, password, article_name):
 def load_product_image(article_code):
     try:
         adjusted_article_code = article_code - 80000  # Ajustez le numéro du fichier image
-        image_path = f"/home/user/Documents/Groupe2/image_produit_{adjusted_article_code}.png"
+        image_path = f"/home/user/Documents/Groupe2-2/image_produit_{adjusted_article_code}.png"
 
         # Utilisez le chemin relatif au répertoire actuel du script
         script_dir = os.path.dirname(__file__)
@@ -308,18 +303,8 @@ def modifier_stock(article_index, increment, label_stock_value):
     else:
         print("La quantité ne peut pas être négative.")
 
-def init_stock_page(stock_page):
-    # Création de la barre bleue horizontale en haut pour la page Stock
-    bande_bleue_stock = tk.Frame(stock_page, height=250, bg="blue")  # Ajustez la hauteur selon vos besoins
-    bande_bleue_stock.pack(fill="x")
-
-    # Ajoutez d'autres éléments spécifiques à la page de stock ici
-    label_stock = tk.Label(stock_page, text="Page Stock - Ajoutez vos éléments ici")
-    label_stock.pack(pady=20)
-
 
 def Logistique(username, password):
-    global odoo_connection
     Logistique = tk.Tk()
     Logistique.title("Logistique")
     set_fullscreen(Logistique)
@@ -331,7 +316,7 @@ def Logistique(username, password):
     # Ajout du texte "DASHBOARD" dans la bande bleue
     dashboard_label = tk.Label(bande_bleue, text="DASHBOARD", fg="white", bg="blue", font=("Arial", 18, "bold"))
     dashboard_label.pack(side="left", padx=50)
-
+    
     # Ajout du texte "DASHBOARD" dans la bande bleue
     dashboard_label = tk.Label(bande_bleue, text="-Logistique-", fg="white", bg="blue", font=("Arial", 14, "bold"))
     dashboard_label.pack(side="left", padx=600)
@@ -347,8 +332,19 @@ def Logistique(username, password):
     bande_grise_verticale = tk.Frame(Logistique, width=100, bg="gray")
     bande_grise_verticale.pack(side="left", fill="y")
 
+
     # Permet au cadre de contrôler sa propre taille
     bande_grise_verticale.pack_propagate(0)
+
+        # Boutons "Article" et "Stock"
+    # Boutons "Article" et "Stock"
+    article_button = tk.Button(bande_grise_verticale, text="Article", command=show_article_page, width=10, height=2, bg="light gray", fg="white")
+    article_button.pack(pady=10)
+
+    
+
+    stock_button = tk.Button(bande_grise_verticale, text="Stock", command=show_stock_page, width=10, height=2, bg="light gray", fg="white")
+    stock_button.pack(pady=10)
 
     # Cadre principal pour les informations des articles
     cadre_principal = ttk.Frame(Logistique, padding="10")
@@ -399,31 +395,6 @@ def Logistique(username, password):
         zone_texte.insert("1.0", texte)
         zone_texte.configure(state="normal")
         zone_texte.pack()
-        bouton_article = tk.Button(cadre_texte, text="Select", command=lambda idx=i: action_article(idx))
-        bouton_article.pack(pady=5)
-
-    # Ajout d'une zone de texte en dessous des articles
-    global entry_zone
-    entry_zone = tk.Text(Logistique, wrap="word", height=5, width=50, font=("Arial", 12))
-    entry_zone.pack(pady=10)
-
-# Fonction appelée lorsque le bouton "Select" est cliqué
-def action_article(index_article):
-    global selected_article_name
-    # Exemple : Affichez un message avec l'index de l'article sélectionné
-    print(f"Bouton cliqué pour l'article avec l'index {index_article}")
-
-    # Récupérez le nom de la machine en fonction de l'index
-    selected_article_name = get_article_name(odoo_connection, db, 2, password, article_code + index_article)
-
-    if selected_article_name:
-        # Mettez à jour la zone de texte avec le nom de la machine
-        entry_zone.delete("1.0", tk.END)  # Effacez le contenu existant
-        entry_zone.insert(tk.END, f"Machine sélectionnée : {selected_article_name}")
-    else:
-        entry_zone.delete("1.0", tk.END)  # Effacez le contenu existant
-        entry_zone.insert(tk.END, "Erreur : Machine non trouvée.")
-
 
     Logistique.mainloop()
 
@@ -530,6 +501,5 @@ login_button.pack(pady=20)
 
 close_button = tk.Button(Login, text="Quit", command=lambda: on_closing(Login), width=10, height=1, bg="red", fg="white")
 close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
-
 
 Login.mainloop()

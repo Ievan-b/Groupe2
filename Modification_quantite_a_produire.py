@@ -1,4 +1,4 @@
-erp_ipaddr = "172.20.10.7"
+erp_ipaddr = "192.168.201.216"
 erp_port = "8069"
 erp_url = f'http://{erp_ipaddr}:{erp_port}'
 print("Connexion ODOO")
@@ -43,4 +43,4 @@ def update_quantity_to_produce(production_id, new_quantity_to_produce):
         print(f"Erreur lors de la mise à jour de la quantité à produire : {e}")
 
 # Exemple d'utilisation : Mettre à jour la quantité à produire pour l'ordre de fabrication avec l'ID 1
-update_quantity_to_produce(3, 35)
+update_quantity_to_produce(3, 386)
