@@ -60,7 +60,7 @@ class SauvegardeurImageProduitOdoo:
             print(f"Erreur lors de la sauvegarde de l'image du produit : {e}")
 
 if __name__ == "__main__":
-    url = 'http://172.20.10.7:8069'
+    url = 'http://192.168.201.216:8069'
     db = 'Touch_db'
     nom_utilisateur = 'Log'
     mot_de_passe = '1234'
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 
 # Global variables
-url = 'http://172.20.10.7:8069'
+url = 'http://192.168.201.216:8069'
 db = 'Touch_db'
 company_name = 'Touch Tech Solution'
 
@@ -177,6 +177,8 @@ login_button.pack(pady=20)
 # Close button in the top right corner
 close_button = tk.Button(login_window, text="Quit", command=lambda: on_closing(login_window), width=10, height=1, bg="red", fg="white")
 close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
+
+
 
 # Start the main loop for the login window
 login_window.mainloop()

@@ -1,4 +1,4 @@
-erp_ipaddr = "172.20.10.7"
+erp_ipaddr = "192.168.201.216"
 erp_port = "8069"
 erp_url = f'http://{erp_ipaddr}:{erp_port}'
 print("Connexion ODOO")
