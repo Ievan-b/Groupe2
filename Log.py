@@ -1,6 +1,7 @@
 import tkinter as tk
 import xmlrpc.client
 from tkinter import ttk, messagebox
+from PIL import Image
 from PIL import Image, ImageTk
 import os
 

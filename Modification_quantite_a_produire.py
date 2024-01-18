@@ -43,4 +43,4 @@ def update_quantity_to_produce(production_id, new_quantity_to_produce):
         print(f"Erreur lors de la mise à jour de la quantité à produire : {e}")
 
 # Exemple d'utilisation : Mettre à jour la quantité à produire pour l'ordre de fabrication avec l'ID 1
-update_quantity_to_produce(3, 386)
+update_quantity_to_produce(3, 36)
