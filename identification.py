@@ -1,10 +1,8 @@
 import tkinter as tk
-import xmlrpc.client
 from tkinter import ttk, messagebox
+import xmlrpc.client
 import subprocess
-import base64
-
-
+from PIL import Image, ImageTk
 
 # Global variables
 url = 'http://192.168.201.216:8069'
@@ -32,31 +30,29 @@ def connect_to_odoo(url, db, username, password):
 
 def validate_login():
     # Retrieve the information entered by the user
-    username = username_entry.get()
+    selected_username = username_combobox.get()
     password = password_entry.get()
 
     # Check the information (you can add your own verification logic here)
-    odoo_models, uid = connect_to_odoo(url, db, username, password)
+    odoo_models, uid = connect_to_odoo(url, db, selected_username, password)
     if odoo_models and uid:
         print("Connexion réussie à Odoo")
         company_id = get_company_id(odoo_models, db, uid, password, company_name)
         if company_id:
             print(f"L'identifiant de '{company_name}' est : {company_id}")
 
-            # Si l'identification est "Log", lancer Log.py
-            if username == "Log":
+            # Lancer le fichier correspondant en fonction de l'identifiant
+            if selected_username == "Log":
                 subprocess.Popen(['python3', 'Log.py'])
 
-            # Si l'identification est "Prod", lancer Prod.py
-            elif username == "Prod":
+            elif selected_username == "Prod":
                 subprocess.Popen(['python3', 'Prod.py'])
-
 
             # Vous pouvez ajouter des conditions similaires pour d'autres identifiants si nécessaire
 
             # You can add code to open another window or perform other actions if needed
             # For now, I'm just printing a message
-            print(f"Welcome, {username}!")
+            print(f"Welcome, {selected_username}!")
 
             # Fermer la fenêtre de connexion
             login_window.destroy()
@@ -83,28 +79,63 @@ login_window = tk.Tk()
 login_window.title("Connexion")
 
 # Set window size
-login_window.geometry("400x300")
+login_window.geometry("800x500")  # Ajustez la taille de la fenêtre en fonction de vos besoins
 
-# Fields for username and password
-username_label = tk.Label(login_window, text="Nom d'utilisateur:")
-username_label.pack(pady=10)
-username_entry = tk.Entry(login_window)
-username_entry.pack(pady=10)
+# Obtenez les dimensions de l'écran
+screen_width = login_window.winfo_screenwidth()
+screen_height = login_window.winfo_screenheight()
 
-password_label = tk.Label(login_window, text="Mot de passe:")
-password_label.pack(pady=10)
-password_entry = tk.Entry(login_window, show="*")
-password_entry.pack(pady=10)
+# Calculez la position x et y pour centrer la fenêtre
+x_position = int((screen_width - 800) / 2)
+y_position = int((screen_height - 500) / 2)
+
+# Placez la fenêtre au centre de l'écran
+login_window.geometry(f"600x400+{x_position}+{y_position}")
+
+# Création de la barre bleue horizontale en haut
+bande_bleue = tk.Frame(login_window, height=50, bg="blue", pady=10)  # Ajustez la hauteur selon les besoins
+bande_bleue.pack(fill="x", side="top")
+
+# Ajout du texte "DASHBOARD" dans la bande bleue
+dashboard_label = tk.Label(bande_bleue, text="DASHBOARD", fg="white", bg="blue", font=("Arial", 18, "bold"))
+dashboard_label.pack(side="left", padx=10)
+
+# Ajout du bouton "Quitter" dans la bande bleue
+close_button = tk.Button(bande_bleue, text="Quitter", command=lambda: on_closing(login_window), width=10, height=1, bg="red", fg="white")
+close_button.pack(side="right", padx=20)
+
+# Création de la bande grise à gauche
+bande_grise = tk.Frame(login_window, width=150, bg="gray")
+bande_grise.pack(side="left", fill="y")
+
+# Combobox for username
+username_label = tk.Label(bande_grise, text="Sélectionnez l'identifiant:", fg="white", bg="gray")
+username_label.pack(pady=2)
+username_combobox = ttk.Combobox(bande_grise, values=["Prod", "Log"])
+username_combobox.pack(pady=20)
+
+# Fields for password
+password_label = tk.Label(bande_grise, text="Mot de passe:", fg="white", bg="gray")
+password_label.pack(pady=2)
+password_entry = tk.Entry(bande_grise, show="*")
+password_entry.pack(pady=20)
 
 # Button to validate the login
-login_button = tk.Button(login_window, text="Connexion", command=validate_login)
+login_button = tk.Button(bande_grise, text="Connexion", command=validate_login, fg="white", bg="gray")
 login_button.pack(pady=20)
 
-# Close button in the top right corner
-close_button = tk.Button(login_window, text="Quit", command=lambda: on_closing(login_window), width=10, height=1, bg="red", fg="white")
-close_button.place(relx=0.95, rely=0.01, anchor=tk.NE)
+# Load and display the image on the right side
+image_path = "Logo TouchTech Solutions1.png"
+image = Image.open(image_path)
+image = image.resize((400, 260), Image.ANTIALIAS)  # Ajustez la taille de l'image en fonction de vos besoins
+photo = ImageTk.PhotoImage(image)
 
+# Calcul de la position pour centrer l'image verticalement
+y_image_position = int((400 - image.size[1]) / 2)
 
+image_label = tk.Label(login_window, image=photo)
+image_label.image = photo
+image_label.place(x=210, y=y_image_position)  # Ajustez la valeur de x en fonction de vos besoins
 
 # Start the main loop for the login window
 login_window.mainloop()

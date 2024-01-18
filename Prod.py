@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import xmlrpc.client
+
 def set_fullscreen(window):
     window.attributes('-fullscreen', True)
     window.bind("<Escape>", lambda event: window.attributes("-fullscreen", False))
@@ -22,22 +23,6 @@ def create_table(data, parent_frame):
         tree.insert("", "end", values=item)
 
     tree.pack(expand=True, fill="both")
-
-
-def update_quantity_to_produce(erp_url, erp_db, user_id, production_id, new_quantity):
-    models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(erp_url))
-    
-    # Lire les informations actuelles de production
-    production_info = models.execute_kw(erp_db, user_id, '1234',
-                                        'mrp.production', 'read',
-                                        [production_id],
-                                        {'fields': ['product_qty']})
-
-    # Mettre à jour la quantité à produire
-    updated_qty = models.execute_kw(erp_db, user_id, '1234',
-                                     'mrp.production', 'write',
-                                     [[production_id], {'product_qty': new_quantity}])
-
 
 def create_dashboard_page(window):
     blue_bar = tk.Frame(window, height=50, bg="blue")
@@ -71,9 +56,6 @@ def create_dashboard_page(window):
     production_ids = models.execute_kw(erp_db, user_id, erp_pwd,
                                        'mrp.production', 'search', [[]])
 
-    production_ids = models.execute_kw(erp_db, user_id, erp_pwd,
-                                       'mrp.production', 'search', [[]])
-
     data = []
     for production_id in production_ids:
         production_info = models.execute_kw(erp_db, user_id, erp_pwd,
@@ -91,33 +73,7 @@ def create_dashboard_page(window):
         else:
             print(f"ID {production_id} : Informations non trouvées.")
 
-    def on_update_quantity():
-        selected_item = tree.selection()
-        if selected_item:
-            # Récupérer l'ID de l'article sélectionné
-            selected_id = tree.item(selected_item, 'values')[0]  # L'ID est le premier élément dans la liste des valeurs
-
-            # Récupérer la nouvelle quantité à produire à partir du champ de texte
-            new_quantity = int(entry_quantity.get())
-
-            # Appeler la fonction pour mettre à jour la quantité à produire sur Odoo
-            update_quantity_to_produce(erp_url, erp_db, user_id, selected_id, new_quantity)
-
-            # Mettre à jour la table avec les nouvelles données
-            tree.delete(*tree.get_children())
-            create_dashboard_page(window)
-            
     create_table(data, window)
-
-    # Ajouter un champ de texte et un bouton pour la mise à jour de la quantité à produire
-    entry_label = tk.Label(window, text="Nouvelle quantité à produire:")
-    entry_label.pack()
-
-    entry_quantity = tk.Entry(window)
-    entry_quantity.pack()
-
-    update_button = tk.Button(window, text="Mettre à jour", command=on_update_quantity)
-    update_button.pack()
 
 if __name__ == "__main__":
     main_window = tk.Tk()
