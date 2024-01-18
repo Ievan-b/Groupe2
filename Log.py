@@ -13,7 +13,8 @@ url = 'http://192.168.201.216:8069'
 db = 'Touch_db'
 username = "Log"
 password = "1234"
-
+global current_value
+current_value = 0
 
 def set_fullscreen(window):
     window.attributes('-fullscreen', True)
@@ -129,6 +130,12 @@ def get_total_articles(models, db, uid, password):
     except Exception as e:
         print(f"Erreur lors de la récupération du nombre total d'articles : {e}")
         return None
+    
+def update_value(change):
+    global current_value
+    current_value += change
+    value_label.config(text=f"{current_value}")
+    print(f"Valeur actuelle mise à jour: {current_value}")
 
 
 def select_article(index):
@@ -138,9 +145,10 @@ def select_article(index):
     selected_article_stock = get_article_stock(odoo_connection, db, 2, password, selected_article_name)
 
     selected_article_info = (
-        f"Article sélectionné : {selected_article_name}\n"
+        f"Nom : {selected_article_name}\n"
         f"Prix : {selected_article_price['price']}\n"
-        f"Stock : {selected_article_stock}"
+        f"Stock : {selected_article_stock}\n"
+        f"Code : {selected_article_code}"  # Nouvelle ligne pour afficher le code
     )
 
     # Efface le contenu existant de la zone de texte globale
@@ -148,6 +156,10 @@ def select_article(index):
 
     # Ajoute les nouvelles informations à la zone de texte globale
     zone_texte_globale.insert(tk.END, selected_article_info + "\n\n")
+
+def valider_action():
+    print("Action de validation!")
+    # Ajoutez ici le code que vous souhaitez exécuter lors de l'appui sur le bouton "Valider"
 
 
 def create_production_page(window):
@@ -157,6 +169,23 @@ def create_production_page(window):
 
     # Obtenez le nombre total d'articles
     total_articles = get_total_articles(odoo_connection, db, 2, password)
+
+    # Création de la barre bleue horizontale en haut
+    bande_bleue = tk.Frame(window, height=250, bg="blue")  # Ajustez la hauteur selon les besoins
+    bande_bleue.pack(fill="x")
+
+    # Ajout du texte "DASHBOARD" dans la bande bleue
+    dashboard_label = tk.Label(bande_bleue, text="DASHBOARD", fg="white", bg="blue", font=("Arial", 18, "bold"))
+    dashboard_label.pack(side="left", padx=50)
+
+    # Ajout du texte "-Logistique-" dans la bande bleue
+    logistique_label = tk.Label(bande_bleue, text="-Logistique-", fg="white", bg="blue", font=("Arial", 14, "bold"))
+    logistique_label.pack(side="left", padx=600)
+
+    # Ajout du bouton "Quitter" dans la bande bleue
+    close_button = tk.Button(bande_bleue, text="Quitter", command=lambda: on_closing(window), width=10, height=1, bg="red", fg="white")
+    close_button.pack(side="right", padx=20)
+
 
     if total_articles is None:
         messagebox.showerror("Erreur", "Impossible de récupérer le nombre total d'articles.")
@@ -231,7 +260,30 @@ if __name__ == "__main__":
     create_production_page(main_window)
 
     # Création d'une zone de texte en dessous des pages
-    zone_texte_globale = tk.Text(main_window, wrap="word", height=5, width=80, font=("Arial", 12))
+    zone_texte_globale = tk.Text(main_window, wrap="word", height=7, width=30, font=("Arial", 12))
     zone_texte_globale.pack(pady=10)
 
-    main_window.mainloop()
+# Création d'un cadre pour les boutons
+cadre_boutons = tk.Frame(main_window)
+cadre_boutons.pack(side="top", pady=10, padx=10)  
+
+# Ajout des deux boutons à droite du cadre
+boutonplus = tk.Button(cadre_boutons, text="+", command=lambda: update_value(1))
+boutonplus.pack(side="right", padx=5)
+
+# Création d'un cadre pour encadrer la zone d'affichage de la valeur actuelle
+value_frame = tk.Frame(cadre_boutons, bd=2, relief="solid")
+value_frame.pack(side="right", padx=5)
+
+value_label = tk.Label(value_frame, text=f"{current_value}")
+value_label.pack()
+
+boutonmoin = tk.Button(cadre_boutons, text="-", command=lambda: update_value(-1))
+boutonmoin.pack(side="right", padx=5)
+
+# Création d'un bouton "Valider" en vert à droite des boutons + et -
+bouton_valider = tk.Button(cadre_boutons, text="Valider", command=lambda: valider_action())
+bouton_valider.configure(bg="green", fg="white")  # Couleur verte avec texte blanc
+bouton_valider.pack(side="right", padx=5)
+
+main_window.mainloop()
