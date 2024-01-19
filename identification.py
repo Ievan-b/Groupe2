@@ -125,7 +125,7 @@ login_button = tk.Button(bande_grise, text="Connexion", command=validate_login, 
 login_button.pack(pady=20)
 
 # Load and display the image on the right side
-image_path = "Logo TouchTech Solutions1.png"
+image_path = "Logo TouchTech Solutions.png"
 image = Image.open(image_path)
 image = image.resize((400, 260), Image.ANTIALIAS)  # Ajustez la taille de l'image en fonction de vos besoins
 photo = ImageTk.PhotoImage(image)

@@ -1,10 +1,10 @@
+import xmlrpc.client
+
 erp_ipaddr = "192.168.201.216"
 erp_port = "8069"
 erp_url = f'http://{erp_ipaddr}:{erp_port}'
 print("Connexion ODOO")
 print(f"@URL={erp_url}")
-
-import xmlrpc.client
 
 common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(erp_url))
 version = common.version()
@@ -18,17 +18,15 @@ print(f"Odoo authentification:{user_id}")
 
 models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(erp_url))
 access = models.execute_kw(erp_db, user_id, erp_pwd,
-'mrp.production', 'check_access_rights',
-['write'], {'raise_exception': False})
-print(f"Manufactoring Order write access rights : {access}")
-
-# ... (votre code existant)
+                           'mrp.production', 'check_access_rights',
+                           ['write'], {'raise_exception': False})
+print(f"Manufacturing Order write access rights : {access}")
 
 # ID de l'article que vous souhaitez mettre à jour
-product_id = 3 # Remplacez ceci par l'ID de votre article
+product_id = 3  # Remplacez ceci par l'ID de votre article
 
-# Nouvelle quantité pour l'artcle
-new_quantity = 15 # Remplacez ceci par la nouvelle quantité
+# Nouvelle quantité pour l'article
+new_quantity = 158  # Remplacez ceci par la nouvelle quantité
 
 # Recherche de l'article dans Odoo
 article = models.execute_kw(erp_db, user_id, erp_pwd,
@@ -52,3 +50,5 @@ updated_article = models.execute_kw(erp_db, user_id, erp_pwd,
                                     {'fields': ['quantity']})
 
 print(f"Nouvelle quantité de l'article : {updated_article[0]['quantity']}")
+
+

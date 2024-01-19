@@ -1,141 +1,134 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter.tix import Tree
 import xmlrpc.client
-
-def set_fullscreen(window):
-    window.attributes('-fullscreen', True)
-    window.bind("<Escape>", lambda event: window.attributes("-fullscreen", False))
 
 def on_closing(window):
     print("Fermeture de la fenêtre demandée...")
     window.attributes('-fullscreen', False)
     window.destroy()
 
-def create_table(data, parent_frame):
-    tree = ttk.Treeview(parent_frame)
-    tree["columns"] = ("ID", "Référence", "Date prévue", "Nom de l'article", "Quantité produite", "Quantité à produire")
-
-    for column in tree["columns"]:
-        tree.column(column, anchor="center", width=100)
-        tree.heading(column, text=column)
-
-    for item in data:
-        tree.insert("", "end", values=item)
-
-    tree.pack(expand=True, fill="both")
-
-
-def update_quantity_to_produce(erp_url, erp_db, user_id, production_id, new_quantity):
-    models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(erp_url))
-    
-    # Lire les informations actuelles de production
-    production_info = models.execute_kw(erp_db, user_id, '1234',
-                                        'mrp.production', 'read',
-                                        [production_id],
-                                        {'fields': ['product_qty']})
-
-    # Mettre à jour la quantité à produire
-    updated_qty = models.execute_kw(erp_db, user_id, '1234',
-                                     'mrp.production', 'write',
-                                     [[production_id], {'product_qty': new_quantity}])
-
-
-def create_dashboard_page(window):
-    blue_bar = tk.Frame(window, height=50, bg="blue")
-    blue_bar.pack(fill="x")
-
-    dashboard_label = tk.Label(blue_bar, text="DASHBOARD", fg="white", bg="blue", font=("Arial", 12, "bold"))
-    dashboard_label.pack(side="left", padx=10)
-
-    close_button = tk.Button(blue_bar, text="Quitter", command=window.destroy, width=10, height=1, bg="red", fg="white")
-    close_button.pack(side="right", padx=10)
-
-    production_label = tk.Label(blue_bar, text="Production", fg="white", bg="blue", font=("Arial", 12, "bold"))
-    production_label.pack(side="left", padx=10)
-
-    # Connexion à Odoo
-    erp_ipaddr = "192.168.201.216"
-    erp_port = "8069"
+def connect_to_odoo(erp_ipaddr, erp_port, erp_db, erp_user, erp_pwd):
     erp_url = f'http://{erp_ipaddr}:{erp_port}'
-
-    common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(erp_url))
-    erp_db = "Touch_db"
-    erp_user = "admin"
-    erp_pwd = "1234"
+    common = xmlrpc.client.ServerProxy(f'{erp_url}/xmlrpc/2/common')
+    version = common.version()
     user_id = common.authenticate(erp_db, erp_user, erp_pwd, {})
+    models = xmlrpc.client.ServerProxy(f'{erp_url}/xmlrpc/2/object')
+    return models, user_id, erp_db, erp_pwd
 
-    models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(erp_url))
-    access = models.execute_kw(erp_db, user_id, erp_pwd,
-                               'mrp.production', 'check_access_rights',
-                               ['read'], {'raise_exception': False})
-
+def get_production_data(models, user_id, erp_db, erp_pwd):
     production_ids = models.execute_kw(erp_db, user_id, erp_pwd,
-                                       'mrp.production', 'search', [[]])
+                                       'mrp.production', 'search',
+                                       [[]])
+    production_data = []
 
-    production_ids = models.execute_kw(erp_db, user_id, erp_pwd,
-                                       'mrp.production', 'search', [[]])
-
-    data = []
     for production_id in production_ids:
-        production_info = models.execute_kw(erp_db, user_id, '1234',
+        production_info = models.execute_kw(erp_db, user_id, erp_pwd,
                                             'mrp.production', 'read',
                                             [production_id],
-                                            {'fields':['id', 'name', 'date_planned_start', 'product_id', 'qty_produced', 'product_qty']})
+                                            {'fields': ['name', 'product_id', 'state', 'date_planned_start', 'qty_produced', 'product_qty']})
+
         if production_info:
             reference = production_info[0]['name']
             date_planned = production_info[0]['date_planned_start']
-            product_name = production_info[0]['product_id'][1] if 'product_id' in production_info[0] else ''
+            product_name = production_info[0]['product_id'][1]
             qty_produced = production_info[0]['qty_produced']
             qty_to_produce = production_info[0]['product_qty']
-            data.append((production_id, reference, date_planned, product_name, qty_produced, qty_to_produce))
-        else:
-            print(f"ID {production_id} : Informations non trouvées.")
+            state = production_info[0]['state']
+            production_data.append(
+                (production_id, reference, date_planned, product_name, qty_produced, qty_to_produce, state))
 
-    def on_update_quantity():
-        selected_item = tree.selection()
+    return production_data
+
+def update_quantity_to_produce(models, user_id, erp_db, erp_pwd, production_id, new_quantity_to_produce):
+    try:
+        models.execute_kw(erp_db, user_id, erp_pwd,
+                          'mrp.production', 'write',
+                          [[production_id], {'product_qty': new_quantity_to_produce}])
+        print(f"Quantité à produire de l'ordre de fabrication ID {production_id} mise à jour avec succès!")
+    except xmlrpc.client.Error as e:
+        print(f"Erreur lors de la mise à jour de la quantité à produire : {e}")
+
+class OdooApp:
+    def __init__(self, root, models, user_id, erp_db, erp_pwd):
+        self.root = root
+        self.root.title("Odoo Production Data")
+        self.root.attributes('-fullscreen', True)  # Mettre en plein écran
+
+        # Création de la bande bleue horizontale en haut
+        bande_bleue = tk.Frame(root, height=50, bg="blue")  # Ajustez la hauteur selon les besoins
+        bande_bleue.pack(fill="x")
+
+        # Ajout du texte "DASHBOARD" dans la bande bleue
+        dashboard_label = tk.Label(bande_bleue, text="DASHBOARD", fg="white", bg="blue", font=("Arial", 18, "bold"))
+        dashboard_label.pack(side="left", padx=50)
+
+        # Ajout du texte "-Logistique-" dans la bande bleue
+        logistique_label = tk.Label(bande_bleue, text="-Logistique-", fg="white", bg="blue", font=("Arial", 14, "bold"))
+        logistique_label.pack(side="left", padx=600)
+
+        # Ajout du bouton "Quitter" dans la bande bleue
+        close_button = tk.Button(bande_bleue, text="Quitter", command=lambda: on_closing(root), width=10, height=1, bg="red", fg="white")
+        close_button.pack(side="right", padx=20)
+
+        self.tree = ttk.Treeview(self.root)
+        self.tree["columns"] = ("ID", "Référence", "Date prévue", "Nom de l'article", "Quantité produite", "Quantité à produire", "État")
+        self.tree.heading("#0", text="", anchor="w")
+        self.tree.column("#0", anchor="w", width=0)
+        for col in self.tree["columns"]:
+            self.tree.heading(col, text=col, anchor="w")
+            self.tree.column(col, anchor="w", width=100)
+
+        self.tree.bind("<ButtonRelease-1>", self.on_item_selected)
+
+        self.tree.pack(padx=10, pady=10, expand=True, fill=tk.BOTH)  # Expand et fill pour remplir tout l'écran
+
+        self.quantity_label = ttk.Label(self.root, text="Nouvelle quantité à produire:")
+        self.quantity_label.pack(pady=5)
+
+        self.quantity_entry = ttk.Entry(self.root)
+        self.quantity_entry.pack(pady=5)
+
+        self.update_button = ttk.Button(self.root, text="Mettre à jour la quantité", command=self.update_quantity)
+        self.update_button.pack(pady=10)
+
+        self.models = models
+        self.user_id = user_id
+        self.erp_db = erp_db
+        self.erp_pwd = erp_pwd
+
+        self.load_data()
+
+    def load_data(self):
+        data = get_production_data(self.models, self.user_id, self.erp_db, self.erp_pwd)
+        for item in data:
+            self.tree.insert("", "end", values=item)
+
+    def on_item_selected(self, event):
+        selected_item = self.tree.selection()
         if selected_item:
-            # Récupérer l'ID de l'article sélectionné
-            selected_id = tree.item(selected_item, 'values')[0]  # L'ID est le premier élément dans la liste des valeurs
+            quantity_to_produce = self.tree.item(selected_item)["values"][5]
+            self.quantity_entry.delete(0, "end")
+            self.quantity_entry.insert(0, quantity_to_produce)
 
-            # Récupérer la nouvelle quantité à produire à partir du champ de texte
-            new_quantity = int(entry_quantity.get())
-
-            # Appeler la fonction pour mettre à jour la quantité à produire sur Odoo
-            update_quantity_to_produce(erp_url, erp_db, user_id, selected_id, new_quantity)
-
-            # Mettre à jour la table avec les nouvelles données
-            tree.delete(*tree.get_children())
-            create_dashboard_page(window)
-            
-    create_table(data, window)
-
-    # Ajouter un champ de texte et un bouton pour la mise à jour de la quantité à produire
-    entry_label = tk.Label(window, text="Nouvelle quantité à produire:")
-    entry_label.pack()
-
-    entry_quantity = tk.Entry(window)
-    entry_quantity.pack()
-
-    update_button = tk.Button(window, text="Mettre à jour", command=on_update_quantity)
-    update_button.pack()
+    def update_quantity(self):
+        selected_item = self.tree.selection()
+        if selected_item:
+            production_id = self.tree.item(selected_item)["values"][0]
+            new_quantity_to_produce = self.quantity_entry.get()
+            update_quantity_to_produce(self.models, self.user_id, self.erp_db, self.erp_pwd, production_id, new_quantity_to_produce)
+            # Actualiser l'affichage après la mise à jour
+            self.tree.delete(*self.tree.get_children())
+            self.load_data()
 
 if __name__ == "__main__":
     erp_ipaddr = "192.168.201.216"
     erp_port = "8069"
-    erp_url = f'http://{erp_ipaddr}:{erp_port}'
-
-    common = xmlrpc.client.ServerProxy('{}/xmlrpc/2/common'.format(erp_url))
     erp_db = "Touch_db"
     erp_user = "admin"
     erp_pwd = "1234"
-    user_id = common.authenticate(erp_db, erp_user, erp_pwd, {})
 
-    models = xmlrpc.client.ServerProxy('{}/xmlrpc/2/object'.format(erp_url))
-    
-    main_window = tk.Tk()
-    set_fullscreen(main_window)
+    models, user_id, erp_db, erp_pwd = connect_to_odoo(erp_ipaddr, erp_port, erp_db, erp_user, erp_pwd)
 
-    create_dashboard_page(main_window, erp_url, erp_db, user_id)
-
-    main_window.mainloop()
+    root = tk.Tk()
+    app = OdooApp(root, models, user_id, erp_db, erp_pwd)
+    root.mainloop()

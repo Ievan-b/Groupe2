@@ -1,0 +1,31 @@
+import xmlrpc.client
+
+# Informations de connexion Odoo
+url = "http://192.168.201.216:8069"
+db = "Touch_db"
+username = "admin"
+password = "1234"
+
+# Connexion à l'API Odoo
+common = xmlrpc.client.ServerProxy("{}/xmlrpc/2/common".format(url))
+uid = common.authenticate(db, username, password, {})
+
+# Connexion à l'API des objets Odoo
+models = xmlrpc.client.ServerProxy("{}/xmlrpc/2/object".format(url))
+
+# Recherche des IDs en stockage des articles
+article_ids = models.execute_kw(db, uid, password,
+    'product.product', 'search',
+    [[]],
+    {'limit': 19}
+)
+
+# Pour chaque ID d'article, récupérer le nom associé
+for article_id in article_ids:
+    article_data = models.execute_kw(db, uid, password,
+        'product.product', 'read',
+        [article_id],
+        {'fields': ['name']}
+    )
+    article_name = article_data[0]['name']
+    print(f"ID: {article_id}, Nom de l'article: {article_name}")
