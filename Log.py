@@ -31,7 +31,7 @@ def Relogin(window):
     print("Fermeture de la fenêtre demandée...")
     window.attributes('-fullscreen', False)
     window.destroy()
-    subprocess.Popen(['python3', 'identification.py'])
+    subprocess.Popen(['python3', 'Identification.py'])
 
 
 def get_article_name(models, db, uid, password, article_code):
@@ -107,7 +107,7 @@ def Connect(url, db, username, password):
 def load_product_image(article_code):
     try:
         adjusted_article_code = article_code - 80000  # Ajustez le numéro du fichier image
-        image_path = f"/home/user/Documents/Groupe2-2/image_produit_{adjusted_article_code}.png"
+        image_path = f"/home/user/Documents/Groupe2/Images/image_produit_{adjusted_article_code}.png"
 
         # Utilisez le chemin relatif au répertoire actuel du script
         script_dir = os.path.dirname(__file__)
@@ -168,13 +168,6 @@ def select_article(index):
 
     # Désactive la possibilité de sélectionner le texte
     zone_texte_globale.config(state=tk.DISABLED)
-
-    # Animation pour montrer que l'article est sélectionné
-    # Change la couleur de fond pendant une courte période
-    original_color = cadre_articles[index].cget("background")
-    cadre_articles[index].configure(background="yellow")
-    main_window.update()
-    main_window.after(1000, lambda: cadre_articles[index].configure(background=original_color))
 
     # Load and display the selected article's image
     selected_article_image = load_product_image(selected_article_code)

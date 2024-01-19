@@ -1,11 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
 import xmlrpc.client
+import subprocess
 
 def on_closing(window):
     print("Fermeture de la fenêtre demandée...")
     window.attributes('-fullscreen', False)
     window.destroy()
+
+def Relogin(window):
+    print("Fermeture de la fenêtre demandée...")
+    window.attributes('-fullscreen', False)
+    window.destroy()
+    subprocess.Popen(['python3', 'Identification.py'])
 
 def connect_to_odoo(erp_ipaddr, erp_port, erp_db, erp_user, erp_pwd):
     erp_url = f'http://{erp_ipaddr}:{erp_port}'
@@ -69,6 +76,9 @@ class OdooApp:
         # Ajout du bouton "Quitter" dans la bande bleue
         close_button = tk.Button(bande_bleue, text="Quitter", command=lambda: on_closing(root), width=10, height=1, bg="red", fg="white")
         close_button.pack(side="right", padx=20)
+
+        login_button = tk.Button(bande_bleue, text="Login", command=lambda: Relogin(root), width=10, height=1, bg="blue", fg="white")
+        login_button.pack(side="right", padx=40)
 
         self.tree = ttk.Treeview(self.root)
         self.tree["columns"] = ("ID", "Référence", "Date prévue", "Nom de l'article", "Quantité produite", "Quantité à produire", "État")
