@@ -5,7 +5,7 @@ import subprocess
 from PIL import Image, ImageTk
 
 # Global variables
-url = 'http://192.168.201.216:8069'
+url = 'http://172.20.10.7:8069'
 db = 'Touch_db'
 company_name = 'Touch Tech Solution'
 

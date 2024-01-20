@@ -51,7 +51,7 @@ def get_product_name_by_id(product_id, models, erp_db, user_id, erp_pwd):
     return product_name[0]['display_name'] if product_name else None
 
 def update_stock_quantity(product_id, new_quantity):
-    erp_ipaddr = "192.168.201.216"
+    erp_ipaddr = "172.20.10.7"
     erp_port = "8069"
     erp_url = f'http://{erp_ipaddr}:{erp_port}'
 

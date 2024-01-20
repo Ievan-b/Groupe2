@@ -131,7 +131,7 @@ class OdooApp:
             self.load_data()
 
 if __name__ == "__main__":
-    erp_ipaddr = "192.168.201.216"
+    erp_ipaddr = "172.20.10.7"
     erp_port = "8069"
     erp_db = "Touch_db"
     erp_user = "admin"
