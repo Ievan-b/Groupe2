@@ -10,7 +10,7 @@ global article_code
 global selected_article_index
 selected_article_index = None
 article_code = 80001
-url = 'http://172.20.10.7:8069'
+url = 'http://192.168.200.234:8069'
 db = 'Touch_db'
 username = "Log"
 password = "1234"
@@ -31,7 +31,7 @@ def Relogin(window):
     print("Fermeture de la fenêtre demandée...")
     window.attributes('-fullscreen', False)
     window.destroy()
-    subprocess.Popen(['python3', 'Identification.py'])
+    subprocess.Popen(['python3', 'identification.py'])
 
 
 def get_article_name(models, db, uid, password, article_code):
@@ -168,6 +168,13 @@ def select_article(index):
 
     # Désactive la possibilité de sélectionner le texte
     zone_texte_globale.config(state=tk.DISABLED)
+
+    # Animation pour montrer que l'article est sélectionné
+    # Change la couleur de fond pendant une courte période
+    original_color = cadre_articles[index].cget("background")
+    cadre_articles[index].configure(background="yellow")
+    main_window.update()
+    main_window.after(1000, lambda: cadre_articles[index].configure(background=original_color))
 
     # Load and display the selected article's image
     selected_article_image = load_product_image(selected_article_code)
