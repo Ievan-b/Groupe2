@@ -49,6 +49,9 @@ Modification des Paramètres Réseau de la Machine Virtuelle :
 PC2 (Fichier Logistique).
 Introduction:
 - Le fichier Logistique comprend les instructions pour installer et exécuter le programme sur PC2.
+      - L'identifiant : "Log"
+      - Le moot de passe : "1234"
+      - Adresse IP : 172.31.11.13
 
 Installer la machine virtuelle PC_2 sur Virtual Box :
 - Téléchargez et installez Virtual Box sur votre ordinateur.
@@ -79,8 +82,14 @@ Autrement, si vous utilisez le fichier .py et le fichier requierment :
 - Le fichier requirement contient l'ensemble des versions à installer pour les dépendances.
 
 ========================================================================================
+
+PC3 (Fichier Production).
+Introduction:
+- Le fichier Production comprend les instructions pour installer et exécuter le programme sur PC3.
+      - L'identifiant : "Prod"
+      - Le moot de passe : "1234"
+      - Adresse IP : 172.31.11.13
    
-Installation et Exécution sur PC3
 Installation de la Machine Virtuelle PC3 sur VirtualBox :
 Téléchargez et installez VirtualBox sur votre ordinateur.
 
