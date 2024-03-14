@@ -13,6 +13,7 @@ Sommaire:
 Installation de la Machine Virtuelle PC_1 sur VirtualBox :
 - Assurez-vous d'avoir installé VirtualBox version "7.3.10" sur votre ordinateur.
 - Démarrez la machine virtuelle PC_1.
+- La machine virtuel devra être configurer en NAT afin de permettre la connexion.
 
 Configuration de Portainer :
 - Accédez au site internet portainer.io à l'adresse http://localhost:9000. Ce site est déjà préinstallé et contient les images nécessaires.
