@@ -1,21 +1,13 @@
 Notice d'utilisation:
 
 Sommaire:
-- Contexte
+
 - PC1 (ERP odoo)
-    - Introduction
-    - Configuration
-    - Déployement des containers
-    - 
+
 - PC2 (Fichier Logistique)
-    - Introduction
-    - Fichier.exe
-    - Fichier.py
+
 - PC3 (Fichier Production)
-    - Introduction
-    - Fichier.exe
-    - Fichier.py
- 
+
 ========================================================================================
 
 Installation de la Machine Virtuelle PC_1 sur VirtualBox :
@@ -36,12 +28,12 @@ Configuration de la Stack :
 Configuration du Serveur ERP Odoo :
 - Ouvrez le serveur ERP Odoo sur un navigateur en utilisant le lien : http://localhost:8069, ou accédez au docker que vous venez de créer et cliquez sur "8069" dans la colonne "published ports".
 - Sur le site, sélectionnez "Gestion des bases de données", puis "Restore Database".
-- Entrez le Master Password (MSIR5), cliquez sur "Parcourir" et sélectionnez le fichier .ZIP téléchargé dans le répertoire spécifié (NomDeVotreRepertoire/SOUMSOUM).
-- Attribuez un nom à votre base de données, qui doit être "SOUMSOUM".
+- Entrez le Master Password (MSIR5), cliquez sur "Parcourir" et sélectionnez le fichier .ZIP téléchargé dans le disque dur.
+- Attribuez un nom à votre base de données, qui doit être "Touch_db".
 
 Modification des Paramètres Réseau de la Machine Virtuelle :
 - Passez en accès par pont dans les paramètres réseau de votre machine virtuelle.
-- Changez l'adresse IP de votre machine virtuelle contenant le docker pour 172.31.10.158.
+- Changez l'adresse IP de votre machine virtuelle contenant le docker pour 172.31.11.13
 - Déconnectez-vous du réseau wifi sur la machine virtuelle, puis reconnectez-vous pour que les modifications soient prises en compte.
 
 ========================================================================================
