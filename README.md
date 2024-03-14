@@ -45,6 +45,8 @@ Introduction:
       - L'identifiant : "Log"
       - Le moot de passe : "1234"
       - Adresse IP : 172.31.11.13
+      - Version python : 3.10 (Utile selon le moyen Utiliser)
+      - Version Pillow 8.4.0 (Utile selon le moyen Utiliser)
 
 Installer la machine virtuelle PC_2 sur Virtual Box :
 - Téléchargez et installez Virtual Box sur votre ordinateur.
@@ -82,6 +84,8 @@ Introduction:
       - L'identifiant : "Prod"
       - Le moot de passe : "1234"
       - Adresse IP : 172.31.11.13
+      - Version python : 3.10 (Utile selon le moyen Utiliser)
+      - Version Pillow 8.4.0 (Utile selon le moyen Utiliser)
    
 Installation de la Machine Virtuelle PC3 sur VirtualBox :
 - Téléchargez et installez VirtualBox sur votre ordinateur.
