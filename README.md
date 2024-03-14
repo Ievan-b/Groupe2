@@ -46,34 +46,33 @@ Modification des Paramètres Réseau de la Machine Virtuelle :
 
 ========================================================================================
       
-PC2 (Fichier Logistique)
-Introduction
+PC2 (Fichier Logistique).
+Introduction:
 Le fichier Logistique comprend les instructions pour installer et exécuter le programme sur PC2.
-s
-Installer la machine virtuelle PC_2 sur Virtual Box :
 
+Installer la machine virtuelle PC_2 sur Virtual Box :
 Téléchargez et installez Virtual Box sur votre ordinateur.
 Créez une nouvelle machine virtuelle PC_2 et démarrez-la.
+
 Connexion au réseau afpicfai_wifi_guests :
-
 Assurez-vous que la machine virtuelle est connectée au réseau afpicfai_wifi_guests.
-Copier les fichiers depuis la clé USB :
 
+Copier les fichiers depuis la clé USB :
 Insérez la clé USB contenant les fichiers dans votre ordinateur hôte.
 Copiez les fichiers de la clé USB vers un emplacement de votre choix sur la machine virtuelle PC_2.
-Fichier.exe
+Fichier.exe.
+
 Récupérer le fichier Log.exe et l'exécuter :
-
 Recherchez et exécutez le fichier Log.exe sur la machine virtuelle PC_2.
-Si l'exécution échoue avec le fichier .exe :
 
+Si l'exécution échoue avec le fichier .exe :
 Essayez l'exécution avec le fichier .sh.
 Si cela ne fonctionne toujours pas, essayez avec le fichier .py et le fichier requierment.
+
 Si vous utilisez le fichier .sh :
-
 Ce fichier vérifiera et installera Python version 3.10 et Pillow version 8.4.0, ainsi que le fichier .py.
-Autrement, si vous utilisez le fichier .py et le fichier requierment :
 
+Autrement, si vous utilisez le fichier .py et le fichier requierment :
 Le fichier .py contient l'application.
 Le fichier requirement contient l'ensemble des versions à installer pour les dépendances.
 
