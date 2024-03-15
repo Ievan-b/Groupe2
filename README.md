@@ -18,6 +18,7 @@ Installation de la Machine Virtuelle PC_1 sur VirtualBox :
 
 Configuration de Portainer :
 - Accédez au site internet portainer.io à l'adresse http://localhost:9000. Ce site est déjà préinstallé et contient les images nécessaires.
+- Le mot de passe de portainer est "portainer"
 - Connectez-vous en tant qu'administrateur.
 - Cliquez sur "Local", puis allez dans l'onglet "Stacks".
 - Cliquez sur "Add Stack".
@@ -67,6 +68,7 @@ Fichier.exe.
 
 Récupérer le fichier Log.exe et l'exécuter :
 - Recherchez et exécutez le fichier Log.exe sur la machine virtuelle PC_2.
+- Si il y a un soucis au démarrage faire clic droit sur le fichier et Lancer dans la commande.
 
 Si l'exécution échoue avec le fichier .exe :
 - Essayez l'exécution avec le fichier .sh.
@@ -103,6 +105,7 @@ Copie des Fichiers depuis la Clé USB :
 
 Essai du Fichier .exe :
 - Essayez d'abord d'exécuter le fichier Prod.exe sur la machine virtuelle PC3.
+- Si il y a un soucis dans l'execution du fichier il y a peut être un message qui apparait, il faut developper et appuyer sur "executer quand meme".
 
 En cas d'échec de l'exécution avec le fichier .exe :
 - Essayez ensuite d'exécuter le fichier Prod.bash.
