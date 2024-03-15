@@ -25,6 +25,8 @@ Configuration de la Stack :
 - Entrez un nom pour la stack.
 - Allez dans le web editor et collez le contenu du fichier Docker compose.yml.
 - Cliquez sur "Deploy the Stack" et vérifiez que les trois serveurs sont en running.
+Si des difficulté sont rencontrer, assurez-vous qu'il n'y ai pas d'autre container occupant le port 8069, dans ce cas suprimé les container sauf celui nommées "portainer" et retenter la configuration.
+Redémarer la machine virtuel peut aussi être une solution.
 
 Configuration du Serveur ERP Odoo :
 - Ouvrez le serveur ERP Odoo sur un navigateur en utilisant le lien : http://localhost:8069, ou accédez au docker que vous venez de créer et cliquez sur "8069" dans la colonne "published ports".
